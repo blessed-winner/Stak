@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react';
-import React, { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { cn, getEmbedUrl, formatDate } from '../lib/utils';
