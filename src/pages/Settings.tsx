@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Bell, LayoutDashboard, LogOut, Shield, Upload, User, FolderClosed } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
-import { usePortals } from '../hooks/usePortals';
+import { useDashboard } from '../hooks/usePortals';
 import { ROUTES } from '../constants';
 import { cn, slugify } from '../lib/utils';
 import { supabase } from '../lib/supabase';
@@ -17,7 +17,7 @@ type NotificationKey = (typeof NOTIFICATION_KEYS)[number];
 
 export default function Settings() {
   const { profile, signOut, setProfile } = useAuthStore();
-  const { stats } = usePortals();
+  const { stats } = useDashboard();
   const location = useLocation();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [saving, setSaving] = useState(false);
