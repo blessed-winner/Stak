@@ -31,6 +31,9 @@ export default function PortalDetail() {
   const [durations, setDurations] = useState<Record<string, string>>({});
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; label: string } | null>(null);
   const [hiddenNoteIds, setHiddenNoteIds] = useState<string[]>([]);
+  const [currentPlaybackTime, setCurrentPlaybackTime] = useState<string>('--:--');
+  const [selectedRoundDuration, setSelectedRoundDuration] = useState<string>('--:--');
+  const videoRef = React.useRef<HTMLVideoElement>(null);
 
   const prevRoundsLength = React.useRef(rounds.length);
 
@@ -53,17 +56,45 @@ export default function PortalDetail() {
     });
   }, [rounds, selectedRound]);
 
+  useEffect(() => {
+    setCurrentPlaybackTime('--:--');
+    setSelectedRoundDuration('--:--');
+  }, [selectedRound?.id]);
+
+  useEffect(() => {
+    async function fetchSelectedDuration() {
+      if (!selectedRound?.videoUrl) return;
+      const duration = await getVideoDuration(selectedRound.videoUrl);
+      setSelectedRoundDuration(duration);
+    }
+
+    fetchSelectedDuration();
+  }, [selectedRound?.videoUrl]);
+
+  const formatPlaybackTime = (timeInSeconds: number) => {
+    const safeSeconds = Number.isFinite(timeInSeconds) ? Math.max(timeInSeconds, 0) : 0;
+    const mins = Math.floor(safeSeconds / 60);
+    const secs = Math.floor(safeSeconds % 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const syncCurrentPlaybackTime = () => {
+    if (!videoRef.current) return;
+    setCurrentPlaybackTime(formatPlaybackTime(videoRef.current.currentTime));
+  };
+
   const handlePostNote = async () => {
     if (!portal || !selectedRound || !newNote) return;
     setIsPosting(true);
     try {
+      const noteTimestamp = currentPlaybackTime !== '--:--' ? currentPlaybackTime : null;
       const { error } = await supabase
         .from('revision_notes')
         .insert({
           portal_id: portal.id,
           round_id: selectedRound.id,
           note: `[INTERNAL] ${newNote}`,
-          timestamp_ref: '0:00' // Base case for internal notes
+          timestamp_ref: noteTimestamp
         });
       
       if (error) throw error;
@@ -260,13 +291,15 @@ export default function PortalDetail() {
                     : "border-transparent hover:bg-black/[0.02]"
                 )}
               >
-                <div className="flex items-center justify-between gap-4 mb-2">
+                  <div className="flex items-center justify-between gap-4 mb-2">
                   <div className="bg-black/5 w-8 h-8 rounded-full flex items-center justify-center text-[#999] group-hover:bg-black group-hover:text-white transition-stak">
                     <Play size={12} fill="currentColor" />
                   </div>
-                  <span className="text-[10px] font-mono font-bold text-[#CCC] bg-black/5 px-2 py-0.5 rounded-sm">
-                    {durations[round.id] || '--:--'}
-                  </span>
+                  {durations[round.id] && durations[round.id] !== '--:--' ? (
+                    <span className="text-[10px] font-mono font-bold text-[#CCC] bg-black/5 px-2 py-0.5 rounded-sm">
+                      {durations[round.id]}
+                    </span>
+                  ) : null}
                 </div>
                 <div>
                   <h4 className="text-sm font-semibold truncate mb-1">Round {round.roundNumber} — {round.title || 'Initial Edit'}</h4>
@@ -313,11 +346,22 @@ export default function PortalDetail() {
                     />
                   ) : (
                     <video 
+                      ref={videoRef}
                       src={selectedRound.videoUrl} 
                       controls 
+                      onLoadedMetadata={syncCurrentPlaybackTime}
+                      onTimeUpdate={syncCurrentPlaybackTime}
+                      onSeeked={syncCurrentPlaybackTime}
                       className="w-full h-full object-contain"
                     />
                   )}
+               </div>
+               <div className="mt-3 flex items-center justify-between text-[10px] font-bold uppercase tracking-widest text-[#999]">
+                 <span>Current time</span>
+                 <span>{currentPlaybackTime === '--:--' ? 'Time unavailable' : currentPlaybackTime}</span>
+                 {selectedRoundDuration !== '--:--' && (
+                   <span>Duration {selectedRoundDuration}</span>
+                 )}
                </div>
             </div>
           )}
@@ -327,7 +371,7 @@ export default function PortalDetail() {
               <div key={note.id} className="bg-white border border-black/5 p-6 md:p-8 rounded-sm transition-stak hover:shadow-sm">
                 <div className="flex gap-6 md:gap-8">
                   <span className="text-sm font-mono font-bold text-black/40 leading-relaxed shrink-0">
-                    {note.timestampRef || '0:00'}
+                    {note.timestampRef || '—'}
                   </span>
                   <div className="flex-1">
                     <p className="text-[15px] leading-relaxed text-black mb-6">
@@ -386,7 +430,9 @@ export default function PortalDetail() {
                     <div className="flex items-center justify-between pt-6 border-t border-black/5">
                       <div className="flex items-center gap-2 text-[#999]">
                         <Clock size={16} />
-                        <span className="text-xs font-mono font-medium tracking-tight">Internal Note</span>
+                        <span className="text-xs font-mono font-medium tracking-tight">
+                          {currentPlaybackTime === '--:--' ? 'Internal Note' : `Internal Note • ${currentPlaybackTime}`}
+                        </span>
                       </div>
                       <button 
                         className="bg-black text-white px-8 py-2.5 rounded-sm text-sm font-semibold hover:bg-black/90 transition-stak disabled:opacity-20"

@@ -95,7 +95,12 @@ export default function ClientPortal() {
       const submissionTimestamp = videoRef.current
         ? formatPlaybackTime(videoRef.current.currentTime)
         : timestamp;
-      await submitRevision(portal.id, currentRound.id, feedback, submissionTimestamp);
+      await submitRevision(
+        portal.id,
+        currentRound.id,
+        feedback,
+        submissionTimestamp === '--:--' ? undefined : submissionTimestamp,
+      );
       setFeedback('');
       await refreshNotes();
     } catch (error) {
@@ -144,7 +149,11 @@ export default function ClientPortal() {
     );
   }
 
-  const roundInfo = `Round ${currentRound?.roundNumber || 0} | ${duration} | ${formatDate(currentRound?.uploadedAt)}`;
+  const roundInfo = [
+    `Round ${currentRound?.roundNumber || 0}`,
+    duration !== '--:--' ? duration : null,
+    formatDate(currentRound?.uploadedAt),
+  ].filter(Boolean).join(' | ');
   return (
     <div className="min-h-screen bg-[#faf8f4] text-black selection:bg-black selection:text-white">
       <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(0,0,0,0.08)_1px,transparent_0)] [background-size:16px_16px] opacity-40" />
@@ -310,8 +319,8 @@ export default function ClientPortal() {
               {visibleNotes.map((note) => (
                 <div key={note.id} className="border border-black/10 bg-white px-4 py-4 shadow-[0_8px_20px_rgba(0,0,0,0.04)]">
                   <div className="flex items-center justify-between gap-3">
-                    <span className="font-mono text-xs tracking-[0.18em] text-black/45">
-                      {note.timestampRef || '00:00'}
+                  <span className="font-mono text-xs tracking-[0.18em] text-black/45">
+                      {note.timestampRef || '—'}
                     </span>
                     <span
                       className={cn(

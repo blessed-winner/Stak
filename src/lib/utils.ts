@@ -70,14 +70,10 @@ export async function getVideoDuration(url: string): Promise<string> {
   if (!url) return '--:--';
   
   try {
-    let oembedUrl = '';
     if (url.includes('youtube.com') || url.includes('youtu.be')) {
-      // YouTube oEmbed doesn't include duration directly in standard response unfortunately
-      // But we can try to guess or use a placeholder if we can't get it easily.
-      // Actually, standard oEmbed doesn't always have it.
-      return '03:45'; // Standard placeholder for demo if we can't fetch
+      return '--:--';
     } else if (url.includes('vimeo.com')) {
-      oembedUrl = `https://vimeo.com/api/oembed.json?url=${encodeURIComponent(url)}`;
+      const oembedUrl = `https://vimeo.com/api/oembed.json?url=${encodeURIComponent(url)}`;
       const res = await fetch(oembedUrl);
       const data = await res.json();
       if (data.duration) {
@@ -85,12 +81,33 @@ export async function getVideoDuration(url: string): Promise<string> {
         const secs = data.duration % 60;
         return `${mins}:${secs.toString().padStart(2, '0')}`;
       }
+    } else {
+      return await new Promise((resolve) => {
+        const video = document.createElement('video');
+        video.preload = 'metadata';
+        video.src = url;
+        video.onloadedmetadata = () => {
+          const totalSeconds = Number.isFinite(video.duration) ? video.duration : 0;
+          resolve(formatPlaybackSeconds(totalSeconds));
+          video.remove();
+        };
+        video.onerror = () => {
+          resolve('--:--');
+          video.remove();
+        };
+      });
     }
   } catch (e) {
     console.error('Error fetching duration:', e);
   }
   
   return '--:--';
+}
+
+function formatPlaybackSeconds(totalSeconds: number) {
+  const mins = Math.floor(totalSeconds / 60);
+  const secs = Math.floor(totalSeconds % 60);
+  return `${mins}:${secs.toString().padStart(2, '0')}`;
 }
 
 export function slugify(text: string) {
