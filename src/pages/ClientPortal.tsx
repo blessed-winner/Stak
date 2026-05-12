@@ -16,7 +16,6 @@ export default function ClientPortal() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [duration, setDuration] = useState('--:--');
   const [videoProgress, setVideoProgress] = useState(0);
-  const [deleteTarget, setDeleteTarget] = useState<{ id: string; label: string } | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   const { rounds, loading: loadingRounds } = useClientRounds(portal?.id || '');
@@ -115,8 +114,7 @@ export default function ClientPortal() {
     );
   }
 
-  const roundInfo = `Round ${currentRound?.roundNumber || 0} · ${duration} · ${formatDate(currentRound?.uploadedAt)}`;
-
+  const roundInfo = `Round ${currentRound?.roundNumber || 0} | ${duration} | ${formatDate(currentRound?.uploadedAt)}`;
   return (
     <div className="min-h-screen bg-[#faf8f4] text-black selection:bg-black selection:text-white">
       <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(0,0,0,0.08)_1px,transparent_0)] [background-size:16px_16px] opacity-40" />

@@ -30,6 +30,7 @@ export default function PortalDetail() {
   const [isSubmittingRound, setIsSubmittingRound] = useState(false);
   const [durations, setDurations] = useState<Record<string, string>>({});
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; label: string } | null>(null);
+  const [hiddenNoteIds, setHiddenNoteIds] = useState<string[]>([]);
 
   const prevRoundsLength = React.useRef(rounds.length);
 
@@ -80,6 +81,7 @@ export default function PortalDetail() {
   const handleDeleteNote = async (noteId: string) => {
     try {
       await deleteNote(noteId);
+      setHiddenNoteIds(prev => [...prev, noteId]);
       await refreshPortal();
       addToast('Note deleted', 'success');
       setDeleteTarget(null);
@@ -138,7 +140,7 @@ export default function PortalDetail() {
   }
 
   const portalUrl = `${window.location.origin}/p/${profile?.slug}/${portal.slug}`;
-  const roundNotes = notes.filter(n => n.roundId === selectedRound?.id);
+  const roundNotes = notes.filter(n => n.roundId === selectedRound?.id && !hiddenNoteIds.includes(n.id));
 
   return (
     <div className="min-h-screen bg-[#F8F8F8] text-black">

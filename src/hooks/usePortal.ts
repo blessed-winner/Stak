@@ -199,10 +199,14 @@ export async function archivePortal(portalId: string) {
 }
 
 export async function deleteNote(noteId: string) {
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from('revision_notes')
     .delete()
-    .eq('id', noteId);
+    .eq('id', noteId)
+    .select('id');
   
   if (error) throw error;
+  if (!data || data.length === 0) {
+    throw new Error('No note was deleted');
+  }
 }
