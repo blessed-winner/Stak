@@ -83,6 +83,7 @@ export default function Settings() {
     setSaving(true);
     try {
       let nextAvatarUrl = profile.avatarUrl || null;
+      let avatarUploadWarning = false;
 
       if (avatarFile) {
         setUploadingAvatar(true);
@@ -92,10 +93,13 @@ export default function Settings() {
           .from('avatars')
           .upload(filePath, avatarFile, { upsert: true, contentType: avatarFile.type });
 
-        if (uploadError) throw uploadError;
-
-        const { data } = supabase.storage.from('avatars').getPublicUrl(filePath);
-        nextAvatarUrl = data.publicUrl;
+        if (uploadError) {
+          console.warn('Avatar upload skipped:', uploadError);
+          avatarUploadWarning = true;
+        } else {
+          const { data } = supabase.storage.from('avatars').getPublicUrl(filePath);
+          nextAvatarUrl = data.publicUrl;
+        }
       }
 
       const nextSlug = slugify(formData.slug || formData.displayName || formData.fullName || 'editor');
@@ -127,6 +131,10 @@ export default function Settings() {
 
       setAvatarFile(null);
       setAvatarPreview(null);
+
+      if (avatarUploadWarning) {
+        alert('Profile changes saved. Avatar upload was skipped because the storage bucket is missing.');
+      }
     } catch (error: any) {
       console.error(error);
       alert(error.message || 'Failed to save profile');
