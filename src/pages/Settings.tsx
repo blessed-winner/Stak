@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Bell, Upload, User } from 'lucide-react';
+import { Bell, Pencil, User } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 import { useDashboard } from '../hooks/usePortals';
 import { MobileNav } from '../components/layout/MobileNav';
@@ -174,7 +174,7 @@ export default function Settings() {
                 <form onSubmit={handleSave} className="border border-black/10 bg-white p-5 shadow-[0_12px_30px_rgba(0,0,0,0.04)] md:p-7">
                   <div className="grid gap-5 md:grid-cols-[120px_1fr] md:gap-6">
                     <div className="space-y-3">
-                      <div className="relative h-20 w-20 overflow-hidden rounded-sm border border-black/10 bg-black/5">
+                      <div className="group relative h-20 w-20 overflow-hidden rounded-sm border border-black/10 bg-black/5">
                         {avatarSrc ? (
                           <img src={avatarSrc} alt="Avatar preview" className="h-full w-full object-cover" />
                         ) : (
@@ -182,6 +182,16 @@ export default function Settings() {
                             <User size={34} />
                           </div>
                         )}
+                        <button
+                          type="button"
+                          onClick={() => fileInputRef.current?.click()}
+                          className="absolute inset-0 flex items-center justify-center bg-black/0 text-white opacity-0 transition-colors group-hover:bg-black/30 group-hover:opacity-100"
+                          aria-label="Upload avatar"
+                        >
+                          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-black/70 shadow-lg">
+                            <Pencil size={14} />
+                          </span>
+                        </button>
                       </div>
                       <div>
                         <div className="text-sm font-medium">Avatar</div>
@@ -194,14 +204,7 @@ export default function Settings() {
                         className="hidden"
                         onChange={handleFileChange}
                       />
-                      <button
-                        type="button"
-                        onClick={() => fileInputRef.current?.click()}
-                        className="inline-flex items-center gap-2 rounded-sm border border-black/10 bg-[#fafafa] px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-black/70 transition-colors hover:bg-black/5"
-                      >
-                        <Upload size={13} />
-                        {uploadingAvatar ? 'Uploading...' : 'Upload image'}
-                      </button>
+                      <p className="text-[11px] text-black/45">Click the image to upload a new avatar.</p>
                     </div>
 
                     <div className="grid gap-4">
