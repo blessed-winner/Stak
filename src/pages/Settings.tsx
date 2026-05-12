@@ -66,8 +66,9 @@ export default function Settings() {
 
   const avatarSrc = avatarPreview || profile?.avatarUrl || '';
 
-  const portalUsage = `${stats.activePortals} of ${Math.max(stats.totalPortals, 1)} portals`;
-  const usagePercent = stats.totalPortals > 0 ? Math.round((stats.activePortals / Math.max(stats.totalPortals, 1)) * 100) : 0;
+  const freeTierMaxPortals = 10;
+  const portalUsage = `${Math.min(stats.totalPortals, freeTierMaxPortals)} of ${freeTierMaxPortals} portals`;
+  const usagePercent = Math.min((stats.totalPortals / freeTierMaxPortals) * 100, 100);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0] || null;
@@ -251,7 +252,7 @@ export default function Settings() {
                   <div className="flex items-start justify-between gap-4">
                     <div>
                       <p className="text-[10px] uppercase tracking-[0.22em] text-black/35">Current plan</p>
-                      <h3 className="mt-1 text-2xl font-serif">{profile?.plan ? profile.plan.charAt(0).toUpperCase() + profile.plan.slice(1) : 'Starter'}</h3>
+                      <h3 className="mt-1 text-2xl font-serif">{profile?.plan ? profile.plan.charAt(0).toUpperCase() + profile.plan.slice(1) : 'Free'}</h3>
                     </div>
                     <div className="text-right">
                       <div className="text-3xl font-serif text-black/85">$29<span className="text-sm text-black/45">/mo</span></div>
@@ -264,9 +265,11 @@ export default function Settings() {
                       <span>{portalUsage}</span>
                     </div>
                     <div className="h-1.5 overflow-hidden bg-black/10">
-                      <div className="h-full bg-black" style={{ width: `${Math.min(usagePercent || 8, 100)}%` }} />
+                      <div className="h-full bg-black transition-[width] duration-300" style={{ width: `${usagePercent}%` }} />
                     </div>
-                    <p className="text-[11px] text-black/45">Professional plans include more portals, review links, and custom branding.</p>
+                    <p className="text-[11px] text-black/45">
+                      Free plans include up to {freeTierMaxPortals} portals. Upgrade when you need more room to scale.
+                    </p>
                   </div>
                 </div>
               </section>
