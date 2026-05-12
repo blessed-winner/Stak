@@ -4,9 +4,9 @@ import { supabase } from '../lib/supabase';
 import { cn, getEmbedUrl, formatDate } from '../lib/utils';
 import { MessageSquare, Clock, CheckCircle2, ChevronRight, Play, MoreHorizontal, User, Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { getClientPortal, useClientRounds, useClientNotes, submitRevision, deleteNote } from '../hooks/useClientPortal';
+import { getClientPortal, useClientRounds, useClientNotes, submitRevision } from '../hooks/useClientPortal';
 import { Portal, Round } from '../types';
-import { getVideoDuration, formatRelativeTime } from '../lib/utils';
+import { getVideoDuration } from '../lib/utils';
 
 export default function ClientPortal() {
   const { editorSlug, portalSlug } = useParams<{ editorSlug: string; portalSlug: string }>();
@@ -29,19 +29,9 @@ export default function ClientPortal() {
   };
 
   const { rounds, loading: loadingRounds } = useClientRounds(portal?.id || '');
-  const { notes, loading: loadingNotes, refresh: refreshNotes } = useClientNotes(portal?.id || '');
+  const { notes, refresh: refreshNotes } = useClientNotes(portal?.id || '');
   const currentRound = rounds.length > 0 ? rounds[rounds.length - 1] : null;
   const currentNotes = notes.filter(n => n.roundId === currentRound?.id && n.authorRole === 'client');
-
-  const handleDeleteNote = async (noteId: string) => {
-    if (!window.confirm('Remove this note?')) return;
-    try {
-      await deleteNote(noteId);
-      await refreshNotes();
-    } catch (error: any) {
-      alert(error.message || 'Failed to delete note');
-    }
-  };
 
   useEffect(() => {
     async function fetchData() {
@@ -269,16 +259,7 @@ export default function ClientPortal() {
                                 )}>
                                   {note.authorRole === 'editor' ? 'Editor Note' : 'Reviewer Note'}
                                 </span>
-                                <span className="text-[9px] uppercase font-bold tracking-[0.25em] text-black/10">
-                                  {formatRelativeTime(note.submittedAt)}
-                                </span>
                               </div>
-                              <button 
-                                onClick={() => handleDeleteNote(note.id)}
-                                className="opacity-0 group-hover:opacity-100 text-[9px] font-bold uppercase tracking-[0.25em] text-black/30 hover:text-red-500 transition-all font-bold"
-                              >
-                                Delete note
-                              </button>
                            </div>
                         </div>
                      </div>
