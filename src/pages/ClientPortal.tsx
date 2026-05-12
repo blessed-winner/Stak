@@ -1,9 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { cn, getEmbedUrl, formatDate } from '../lib/utils';
-import { ArrowRight, Clock, Play, User } from 'lucide-react';
-import { getClientPortal, useClientNotes, useClientRounds, submitRevision } from '../hooks/useClientPortal';
+import { ArrowRight, CheckCircle2, Clock, Play, User } from 'lucide-react';
+import { approvePortal, getClientPortal, useClientNotes, useClientRounds, submitRevision } from '../hooks/useClientPortal';
 import { Portal } from '../types';
 import { getVideoDuration } from '../lib/utils';
 
@@ -12,8 +13,9 @@ export default function ClientPortal() {
   const [portal, setPortal] = useState<Portal | null>(null);
   const [loading, setLoading] = useState(true);
   const [feedback, setFeedback] = useState('');
-  const [timestamp, setTimestamp] = useState('0:00');
+  const [timestamp, setTimestamp] = useState('--:--');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isApproving, setIsApproving] = useState(false);
   const [duration, setDuration] = useState('--:--');
   const [videoProgress, setVideoProgress] = useState(0);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -24,13 +26,23 @@ export default function ClientPortal() {
   const currentNotes = notes.filter((note) => note.roundId === currentRound?.id && note.authorRole === 'client');
   const visibleNotes = currentNotes.slice(0, 3);
 
+  const formatPlaybackTime = (seconds: number) => {
+    const safeSeconds = Number.isFinite(seconds) && seconds >= 0 ? seconds : 0;
+    const mins = Math.floor(safeSeconds / 60);
+    const secs = Math.floor(safeSeconds % 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const syncPlaybackTimestamp = () => {
+    if (!videoRef.current) return;
+    setTimestamp(formatPlaybackTime(videoRef.current.currentTime));
+  };
+
   const handleTimeUpdate = () => {
     if (!videoRef.current) return;
 
     const time = videoRef.current.currentTime;
-    const mins = Math.floor(time / 60);
-    const secs = Math.floor(time % 60);
-    setTimestamp(`${mins}:${secs.toString().padStart(2, '0')}`);
+    setTimestamp(formatPlaybackTime(time));
 
     if (videoRef.current.duration > 0) {
       setVideoProgress((time / videoRef.current.duration) * 100);
@@ -60,7 +72,7 @@ export default function ClientPortal() {
   }, [editorSlug, portalSlug]);
 
   useEffect(() => {
-    setTimestamp('0:00');
+    setTimestamp('--:--');
     setVideoProgress(0);
     setDuration('--:--');
     setFeedback('');
@@ -80,13 +92,31 @@ export default function ClientPortal() {
 
     setIsSubmitting(true);
     try {
-      await submitRevision(portal.id, currentRound.id, feedback, timestamp);
+      const submissionTimestamp = videoRef.current
+        ? formatPlaybackTime(videoRef.current.currentTime)
+        : timestamp;
+      await submitRevision(portal.id, currentRound.id, feedback, submissionTimestamp);
       setFeedback('');
       await refreshNotes();
     } catch (error) {
       console.error(error);
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleApproveProject = async () => {
+    if (!portal || !currentRound) return;
+
+    setIsApproving(true);
+    try {
+      await approvePortal(portal.id, currentRound.id);
+      setPortal((current) => (current ? { ...current, status: 'approved' } : current));
+    } catch (error) {
+      console.error(error);
+      alert('Failed to approve this project.');
+    } finally {
+      setIsApproving(false);
     }
   };
 
@@ -140,9 +170,15 @@ export default function ClientPortal() {
                 </span>
               </div>
 
-              <span className="rounded-full bg-black/5 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-black/55">
-                {statusLabel}
-              </span>
+              <button
+                type="button"
+                onClick={handleApproveProject}
+                disabled={isApproving || currentRound?.status === 'approved'}
+                className="inline-flex items-center gap-2 rounded-full bg-black px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.22em] text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                <CheckCircle2 size={12} />
+                {currentRound?.status === 'approved' ? 'Approved' : isApproving ? 'Approving...' : 'Approve project'}
+              </button>
             </div>
           </div>
         </div>
@@ -181,6 +217,8 @@ export default function ClientPortal() {
               <video
                 ref={videoRef}
                 onTimeUpdate={handleTimeUpdate}
+                onLoadedMetadata={syncPlaybackTimestamp}
+                onSeeked={syncPlaybackTimestamp}
                 src={currentRound.videoUrl}
                 controls
                 className="aspect-video w-full object-contain"
@@ -228,6 +266,9 @@ export default function ClientPortal() {
               <div className="mt-2 rounded-sm bg-[#f4f4f4] px-4 py-3 font-mono text-sm tracking-[0.18em] text-black/70">
                 {timestamp}
               </div>
+              <p className="mt-1 text-[10px] text-black/35">
+                The timestamp captures the current video position when you submit.
+              </p>
             </div>
 
             <div>
