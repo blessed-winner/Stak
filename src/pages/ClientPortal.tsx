@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { cn, getEmbedUrl, formatDate } from '../lib/utils';
 import { ArrowRight, Clock, Play, User } from 'lucide-react';
-import { getClientPortal, useClientRounds, useClientNotes, submitRevision } from '../hooks/useClientPortal';
+import { getClientPortal, useClientNotes, useClientRounds, submitRevision } from '../hooks/useClientPortal';
 import { Portal } from '../types';
 import { getVideoDuration } from '../lib/utils';
 
@@ -16,6 +16,7 @@ export default function ClientPortal() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [duration, setDuration] = useState('--:--');
   const [videoProgress, setVideoProgress] = useState(0);
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; label: string } | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   const { rounds, loading: loadingRounds } = useClientRounds(portal?.id || '');
@@ -114,32 +115,34 @@ export default function ClientPortal() {
     );
   }
 
+  const roundInfo = `Round ${currentRound?.roundNumber || 0} · ${duration} · ${formatDate(currentRound?.uploadedAt)}`;
+
   return (
     <div className="min-h-screen bg-[#faf8f4] text-black selection:bg-black selection:text-white">
       <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(0,0,0,0.08)_1px,transparent_0)] [background-size:16px_16px] opacity-40" />
 
       <header className="sticky top-0 z-40 px-4 pt-3">
         <div className="mx-auto max-w-5xl">
-          <div className="rounded-full border border-white/10 bg-[#222] px-4 py-3 text-white shadow-[0_18px_50px_rgba(0,0,0,0.25)] backdrop-blur-md md:px-6">
+          <div className="rounded-full border border-black/10 bg-white/80 px-4 py-3 text-black shadow-[0_12px_35px_rgba(0,0,0,0.08)] backdrop-blur-md md:px-6">
             <div className="flex items-center justify-between gap-4">
               <div className="flex min-w-0 items-center gap-3">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/10 text-white/80">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-black/5 text-black/55">
                   <User size={15} />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-[9px] font-semibold uppercase tracking-[0.28em] text-white/45">Client Portal</p>
-                  <p className="truncate text-sm font-medium text-white/90">{portal.clientName}</p>
+                  <p className="text-[9px] font-semibold uppercase tracking-[0.28em] text-black/35">Client Portal</p>
+                  <p className="truncate text-sm font-medium text-black/85">{portal.clientName}</p>
                 </div>
               </div>
 
               <div className="hidden items-center gap-8 md:flex">
-                <span className="max-w-[280px] truncate text-sm text-white/80">{portal.title}</span>
-                <span className="text-[10px] font-semibold uppercase tracking-[0.25em] text-white/50">
+                <span className="max-w-[280px] truncate text-sm text-black/70">{portal.title}</span>
+                <span className="text-[10px] font-semibold uppercase tracking-[0.25em] text-black/40">
                   Round {currentRound?.roundNumber}
                 </span>
               </div>
 
-              <span className="rounded-full bg-white/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-white/65">
+              <span className="rounded-full bg-black/5 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-black/55">
                 {statusLabel}
               </span>
             </div>
@@ -158,15 +161,12 @@ export default function ClientPortal() {
 
           <h1 className="mt-3 max-w-xl font-serif text-3xl tracking-tight text-black md:text-4xl">
             {portal.title}
-            {currentRound?.title ? <span className="text-black/70"> — {currentRound.title}</span> : null}
+            {currentRound?.title ? <span className="text-black/70"> - {currentRound.title}</span> : null}
           </h1>
 
-          <p className="mt-2 text-sm text-black/55">
-            Hi {portal.clientName}
-          </p>
-
+          <p className="mt-2 text-sm text-black/55">Hi {portal.clientName}</p>
           <p className="mt-2 text-xs font-medium uppercase tracking-[0.2em] text-black/28">
-            Round {currentRound?.roundNumber} · {duration} · {formatDate(currentRound?.uploadedAt)}
+            {roundInfo}
           </p>
         </section>
 

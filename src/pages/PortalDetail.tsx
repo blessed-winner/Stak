@@ -29,6 +29,7 @@ export default function PortalDetail() {
   const [newRoundUrl, setNewRoundUrl] = useState('');
   const [isSubmittingRound, setIsSubmittingRound] = useState(false);
   const [durations, setDurations] = useState<Record<string, string>>({});
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; label: string } | null>(null);
 
   const prevRoundsLength = React.useRef(rounds.length);
 
@@ -77,11 +78,11 @@ export default function PortalDetail() {
   };
 
   const handleDeleteNote = async (noteId: string) => {
-    if (!window.confirm('Are you sure you want to delete this note?')) return;
     try {
       await deleteNote(noteId);
       await refreshPortal();
       addToast('Note deleted', 'success');
+      setDeleteTarget(null);
     } catch (error: any) {
       addToast(error.message || 'Failed to delete note', 'error');
     }
@@ -347,9 +348,10 @@ export default function PortalDetail() {
                           {formatRelativeTime(note.submittedAt)}
                         </span>
                         <div className="w-px h-3 bg-black/5" />
-                        <button className="text-[10px] font-bold uppercase tracking-widest text-[#999] hover:text-black transition-stak">Reply</button>
-                        <button 
-                          onClick={() => handleDeleteNote(note.id)}
+                        <button type="button" className="text-[10px] font-bold uppercase tracking-widest text-[#999] hover:text-black transition-stak">Reply</button>
+                        <button
+                          type="button"
+                          onClick={() => setDeleteTarget({ id: note.id, label: note.note })}
                           className="text-[10px] font-bold uppercase tracking-widest text-red-500 hover:text-red-600 transition-stak"
                         >
                           Delete
@@ -463,6 +465,54 @@ export default function PortalDetail() {
       </div>
 
       <MobileNav />
+
+      {deleteTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <button
+            type="button"
+            onClick={() => setDeleteTarget(null)}
+            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+            aria-label="Close delete dialog"
+          />
+
+          <div className="relative w-full max-w-lg overflow-hidden border border-black/10 bg-[#faf8f4] shadow-[0_30px_80px_rgba(0,0,0,0.18)]">
+            <div className="border-b border-black/5 px-6 py-5">
+              <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-black/35">Confirm delete</p>
+              <h3 className="mt-2 text-2xl font-serif text-black">Delete this note?</h3>
+            </div>
+
+            <div className="px-6 py-5">
+              <p className="text-sm leading-relaxed text-black/65">
+                This will permanently remove the note from the portal. The action cannot be undone.
+              </p>
+
+              <div className="mt-5 rounded-sm border border-black/10 bg-white p-4">
+                <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-black/30">Note preview</p>
+                <p className="mt-2 text-sm leading-relaxed text-black/75">
+                  {deleteTarget.label}
+                </p>
+              </div>
+
+              <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+                <button
+                  type="button"
+                  onClick={() => setDeleteTarget(null)}
+                  className="flex-1 rounded-sm border border-black/10 bg-white px-5 py-3 text-sm font-medium text-black transition-colors hover:bg-black/5"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleDeleteNote(deleteTarget.id)}
+                  className="flex-1 rounded-sm bg-black px-5 py-3 text-sm font-medium text-white transition-opacity hover:opacity-90"
+                >
+                  Delete note
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Add Round Modal */}
       <AnimatePresence>
