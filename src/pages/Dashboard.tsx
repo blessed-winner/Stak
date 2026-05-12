@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { LayoutDashboard, Clock, AlertCircle, Play, ChevronRight, MessageSquare, Download, CheckCircle, Share2, User } from 'lucide-react';
 import { Sidebar } from '../components/layout/Sidebar';
 import { MobileNav } from '../components/layout/MobileNav';
@@ -15,7 +15,9 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const { profile } = useAuthStore();
   const { portals, stats, recentActivity, loading } = useDashboard();
+  const [showAllActivity, setShowAllActivity] = useState(false);
   const typedPortals = portals as (Portal & { videoUrl?: string })[];
+  const visibleActivity = showAllActivity ? recentActivity : recentActivity.slice(0, 5);
 
   if (loading) {
     return (
@@ -133,7 +135,7 @@ export default function Dashboard() {
              <h2 className="text-xl font-semibold mb-8">Recent Activity</h2>
              <div className="bg-white border border-black/5 p-8 rounded-sm">
                 <div className="space-y-8 relative before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-px before:bg-black/5">
-                  {recentActivity.length > 0 ? recentActivity.map((act: any) => (
+                  {visibleActivity.length > 0 ? visibleActivity.map((act: any) => (
                     <ActivityItem 
                       key={act.id}
                       icon={
@@ -159,13 +161,22 @@ export default function Dashboard() {
                     <p className="text-sm text-[#888] italic">No recent activity</p>
                   )}
                 </div>
-                
-                <button 
-                  onClick={() => navigate(ROUTES.PORTALS)}
-                  className="w-full mt-12 py-3 border-t border-black/5 text-[#888] text-sm hover:text-black transition-stak font-medium"
-                >
-                  Manage Portals
-                </button>
+                {recentActivity.length > 5 ? (
+                  <button
+                    type="button"
+                    onClick={() => setShowAllActivity((current) => !current)}
+                    className="w-full mt-10 py-3 border-t border-black/5 text-[#888] text-sm hover:text-black transition-stak font-medium"
+                  >
+                    {showAllActivity ? 'Show less activity' : `Show more activity (${recentActivity.length - 5})`}
+                  </button>
+                ) : (
+                  <button 
+                    onClick={() => navigate(ROUTES.PORTALS)}
+                    className="w-full mt-12 py-3 border-t border-black/5 text-[#888] text-sm hover:text-black transition-stak font-medium"
+                  >
+                    Manage Portals
+                  </button>
+                )}
              </div>
           </section>
         </div>
