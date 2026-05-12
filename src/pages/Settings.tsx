@@ -1,9 +1,9 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { Bell, LayoutDashboard, LogOut, Shield, Upload, User, FolderClosed } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
+import { Bell, Upload, User } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 import { useDashboard } from '../hooks/usePortals';
-import { ROUTES } from '../constants';
+import { MobileNav } from '../components/layout/MobileNav';
+import { Sidebar } from '../components/layout/Sidebar';
 import { cn, slugify } from '../lib/utils';
 import { supabase } from '../lib/supabase';
 
@@ -18,7 +18,6 @@ type NotificationKey = (typeof NOTIFICATION_KEYS)[number];
 export default function Settings() {
   const { profile, signOut, setProfile } = useAuthStore();
   const { stats } = useDashboard();
-  const location = useLocation();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [saving, setSaving] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
@@ -66,15 +65,6 @@ export default function Settings() {
   }, [avatarFile]);
 
   const avatarSrc = avatarPreview || profile?.avatarUrl || '';
-  const avatarInitials = useMemo(() => {
-    const source = formData.displayName || formData.fullName || profile?.displayName || 'Editor';
-    return source
-      .split(' ')
-      .filter(Boolean)
-      .slice(0, 2)
-      .map((part) => part[0]?.toUpperCase())
-      .join('');
-  }, [formData.displayName, formData.fullName, profile?.displayName]);
 
   const portalUsage = `${stats.activePortals} of ${Math.max(stats.totalPortals, 1)} portals`;
   const usagePercent = stats.totalPortals > 0 ? Math.round((stats.activePortals / Math.max(stats.totalPortals, 1)) * 100) : 0;
@@ -155,58 +145,10 @@ export default function Settings() {
     });
   };
 
-  const navItems = [
-    { label: 'Dashboard', to: ROUTES.DASHBOARD, icon: LayoutDashboard },
-    { label: 'Portals', to: ROUTES.PORTALS, icon: FolderClosed },
-    { label: 'Settings', to: ROUTES.SETTINGS, icon: User },
-  ];
-
   return (
     <div className="min-h-screen bg-[#f7f5f1] text-black">
-      <div className="grid min-h-screen lg:grid-cols-[220px_1fr]">
-        <aside className="hidden border-r border-black/10 bg-[#fbfaf7] px-5 py-6 lg:flex lg:flex-col">
-          <div>
-            <div className="text-3xl font-serif tracking-tight">STAK</div>
-            <p className="mt-1 text-[11px] uppercase tracking-[0.18em] text-black/35">Professional editor</p>
-          </div>
-
-          <nav className="mt-12 space-y-1">
-            {navItems.map((item) => {
-              const active = location.pathname === item.to;
-              const Icon = item.icon;
-
-              return (
-                <Link
-                  key={item.label}
-                  to={item.to}
-                  className={cn(
-                    'flex items-center gap-3 border-l-2 px-3 py-3 text-sm transition-colors',
-                    active ? 'border-black bg-black/5 font-semibold' : 'border-transparent text-black/60 hover:bg-black/[0.03] hover:text-black'
-                  )}
-                >
-                  <Icon size={15} />
-                  {item.label}
-                </Link>
-              );
-            })}
-          </nav>
-
-          <button
-            onClick={signOut}
-            className="mt-auto inline-flex items-center gap-2 rounded-sm bg-black px-4 py-3 text-xs font-semibold uppercase tracking-[0.2em] text-white transition-opacity hover:opacity-90"
-          >
-            <LogOut size={14} />
-            Sign out
-          </button>
-
-          <div className="mt-4 text-[11px] text-black/35">
-            <div className="flex items-center gap-2">
-              <Shield size={12} /> Support
-            </div>
-          </div>
-        </aside>
-
-        <main className="px-4 py-8 md:px-8 md:py-10 lg:px-12 xl:px-16">
+      <Sidebar />
+      <main className="px-4 py-8 md:px-8 md:py-10 lg:ml-[240px] lg:px-12 xl:px-16">
           <div className="mx-auto max-w-4xl">
             <header className="mb-10 md:mb-12">
               <h1 className="font-serif text-4xl tracking-tight md:text-5xl">Settings</h1>
@@ -227,8 +169,8 @@ export default function Settings() {
                         {avatarSrc ? (
                           <img src={avatarSrc} alt="Avatar preview" className="h-full w-full object-cover" />
                         ) : (
-                          <div className="flex h-full w-full items-center justify-center bg-black/10 text-2xl font-semibold text-black/70">
-                            {avatarInitials || 'E'}
+                          <div className="flex h-full w-full items-center justify-center bg-black/10 text-black/60">
+                            <User size={34} />
                           </div>
                         )}
                       </div>
@@ -348,14 +290,16 @@ export default function Settings() {
                           key={item.key}
                           type="button"
                           onClick={() => toggleNotification(item.key as NotificationKey)}
-                          className="flex w-full items-center justify-between gap-4 border-b border-black/5 py-3 text-left last:border-b-0"
+                          className="grid w-full grid-cols-[1fr_auto] items-center gap-4 border-b border-black/5 py-4 text-left last:border-b-0"
                         >
-                          <div>
+                          <div className="min-w-0">
                             <p className="text-sm font-medium">{item.title}</p>
                             <p className="mt-1 text-[11px] text-black/45">{item.desc}</p>
                           </div>
-                          <span className={cn('h-5 w-10 rounded-full border transition-colors', enabled ? 'border-black bg-black' : 'border-black/15 bg-black/10')}>
-                            <span className={cn('block h-4 w-4 rounded-full bg-white shadow-sm transition-transform', enabled ? 'translate-x-5' : 'translate-x-0.5')} />
+                          <span className="flex items-center justify-center">
+                            <span className={cn('flex h-5 w-10 items-center rounded-full border p-0.5 transition-colors', enabled ? 'border-black bg-black' : 'border-black/15 bg-black/10')}>
+                              <span className={cn('block h-4 w-4 rounded-full bg-white shadow-sm transition-transform', enabled ? 'translate-x-5' : 'translate-x-0')} />
+                            </span>
                           </span>
                         </button>
                       );
@@ -377,8 +321,8 @@ export default function Settings() {
               </div>
             </div>
           </div>
-        </main>
-      </div>
+      </main>
+      <MobileNav />
     </div>
   );
 }
