@@ -45,7 +45,14 @@ npm install
 
 ### Configure Environment
 
-Create a `.env` file at the project root and add the environment variables required by your Supabase and related services. The repository already includes a `.env` file template in local development, so use the existing setup as your guide.
+Create a `.env` file at the project root and add the variables used by the app.
+
+```env
+VITE_SUPABASE_URL=your-supabase-project-url
+VITE_SUPABASE_ANON_KEY=your-supabase-anon-key
+```
+
+`src/lib/supabase.ts` reads these values at runtime, so the app will not connect without them.
 
 ### Run Locally
 
@@ -90,7 +97,23 @@ npm run lint
 - `src/store/` - UI and auth state management
 - `src/lib/` - shared utilities and Supabase configuration
 
+## How It Works
+
+### For Editors
+
+1. Sign in and land on the dashboard.
+2. Create a new portal for a client project.
+3. Share the generated client link with the reviewer.
+4. Track activity, feedback, and status changes from the portals view.
+5. Review notes, manage rounds, and keep the workflow moving.
+
+### For Clients
+
+1. Open the private portal link shared by the editor.
+2. Watch the current video round inside the client portal.
+3. Add timestamped feedback directly on the frame you want to comment on.
+4. Submit revision notes and follow the latest project round.
+
 ## Notes
 
 This project is structured around a review workflow where editors manage portals and clients leave precise feedback on specific moments in a video. The interface is intentionally clean and editorial, with emphasis on clarity, speed, and review visibility.
-
