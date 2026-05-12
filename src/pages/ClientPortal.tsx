@@ -3,7 +3,8 @@ import { useParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { cn, getEmbedUrl, formatDate } from '../lib/utils';
 import { ArrowRight, CheckCircle2, Clock, Play, User } from 'lucide-react';
-import { approvePortal, getClientPortal, useClientNotes, useClientRounds, submitRevision } from '../hooks/useClientPortal';
+import { getClientPortal, useClientNotes, useClientRounds, submitRevision } from '../hooks/useClientPortal';
+import { approvePortal } from '../hooks/usePortal';
 import { Portal } from '../types';
 import { getVideoDuration } from '../lib/utils';
 
