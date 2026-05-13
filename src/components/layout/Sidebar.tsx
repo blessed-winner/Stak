@@ -30,12 +30,12 @@ export function Sidebar() {
   };
 
   return (
-    <aside className="fixed left-0 top-0 h-full w-[240px] bg-white border-r border-black/5 z-40 transition-stak">
+    <aside className="fixed left-0 top-0 h-full w-[240px] bg-surface-raised border-r border-border-default z-40 transition-stak">
       <div className="flex flex-col h-full py-10">
         {/* Logo */}
         <div className="px-8 mb-10">
           <h1 className="text-3xl font-serif tracking-tight font-medium leading-none">STAK</h1>
-          <p className="text-[11px] text-[#999] mt-2 font-medium">Professional Editor</p>
+          <p className="text-[11px] text-text-tertiary mt-2 font-medium">Professional Editor</p>
         </div>
 
         <div className="px-4 flex-1">
@@ -49,8 +49,8 @@ export function Sidebar() {
                   cn(
                     'flex items-center gap-4 px-4 py-3 transition-stak group relative',
                     isActive 
-                      ? 'text-black' 
-                      : 'text-[#888] hover:text-black hover:bg-black/[0.02]'
+                      ? 'text-text-primary' 
+                      : 'text-text-secondary hover:text-text-primary hover:bg-black/[0.02]'
                   )
                 }
               >
@@ -71,36 +71,36 @@ export function Sidebar() {
         {/* Footer */}
         <div className="px-6 mt-auto space-y-6">
           {/* Upgrade Plan Card */}
-          <div className="bg-[#F2F2F2] p-6 rounded-sm text-center">
+          <div className="bg-surface-overlay p-6 rounded-sm text-center">
             <h4 className="text-[11px] font-bold uppercase tracking-wider mb-1">Free Plan</h4>
             <div className="flex justify-center mb-4">
-               <button className="bg-black text-white px-6 py-2.5 text-xs font-semibold rounded-sm hover:bg-black/90 transition-stak w-full">
+               <button className="bg-brand-primary text-text-inverse px-6 py-2.5 text-xs font-semibold rounded-sm hover:opacity-90 transition-stak w-full">
                 Upgrade Plan
               </button>
             </div>
           </div>
 
           <div className="space-y-4">
-            <a href="#" className="flex items-center gap-4 px-2 py-1 text-[#888] hover:text-black transition-stak">
+            <a href="#" className="flex items-center gap-4 px-2 py-1 text-text-secondary hover:text-text-primary transition-stak">
               <HelpCircle size={20} strokeWidth={1.5} />
               <span className="text-sm font-medium">Support</span>
             </a>
 
-            <div className="pt-6 border-t border-black/5 flex items-center justify-between gap-3 px-2">
+            <div className="pt-6 border-t border-border-default flex items-center justify-between gap-3 px-2">
               <div className="flex items-center gap-3 overflow-hidden">
-                <div className="w-8 h-8 rounded-full bg-black/5 shrink-0 border border-black/5 flex items-center justify-center text-[#999]">
+                <div className="w-8 h-8 rounded-full bg-surface-overlay shrink-0 border border-border-default flex items-center justify-center text-text-tertiary">
                   <User size={16} />
                 </div>
                 <div className="overflow-hidden">
-                  <p className="text-xs font-semibold text-black truncate">{profile?.displayName || 'Editor Name'}</p>
-                  <p className="text-[10px] text-[#999] uppercase tracking-wider font-bold">{profile?.plan || 'Free Plan'}</p>
+                  <p className="text-xs font-semibold text-text-primary truncate">{profile?.displayName || 'Editor Name'}</p>
+                  <p className="text-[10px] text-text-tertiary uppercase tracking-wider font-bold">{profile?.plan || 'Free Plan'}</p>
                 </div>
               </div>
               <button 
                 onClick={handleSignOut}
                 disabled={isSigningOut}
                 className={cn(
-                  "p-2 text-[#999] hover:text-red-500 transition-stak",
+                  "p-2 text-text-tertiary hover:text-red-500 transition-stak",
                   isSigningOut && "opacity-50 cursor-not-allowed"
                 )}
                 title="Log Out"

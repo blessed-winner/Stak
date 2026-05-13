@@ -29,7 +29,7 @@ export function MobileNav() {
   };
 
   return (
-    <nav className="lg:hidden fixed bottom-6 left-6 right-6 bg-white/90 backdrop-blur-md border border-black/5 z-50 px-6 py-3 shadow-[0_8px_30px_rgba(0,0,0,0.1)] rounded-none">
+    <nav className="lg:hidden fixed bottom-6 left-6 right-6 bg-surface-raised/90 backdrop-blur-md border border-border-default z-50 px-6 py-3 shadow-[0_8px_30px_rgba(0,0,0,0.1)] rounded-none">
       <div className="flex items-center justify-around">
         {NAV_ITEMS.map((item) => (
           <NavLink
@@ -38,7 +38,7 @@ export function MobileNav() {
             className={({ isActive }) =>
               cn(
                 'flex flex-col items-center gap-1 p-2 transition-stak',
-                isActive ? 'text-black' : 'text-[#999] hover:text-black'
+                isActive ? 'text-text-primary' : 'text-text-tertiary hover:text-text-primary'
               )
             }
           >
@@ -54,7 +54,7 @@ export function MobileNav() {
           onClick={handleSignOut}
           disabled={isSigningOut}
           className={cn(
-            "flex flex-col items-center gap-1 p-2 text-[#999] hover:text-red-500 transition-stak",
+            "flex flex-col items-center gap-1 p-2 text-text-tertiary hover:text-red-500 transition-stak",
             isSigningOut && "opacity-50 cursor-not-allowed"
           )}
         >

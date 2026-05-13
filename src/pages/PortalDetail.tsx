@@ -154,7 +154,7 @@ export default function PortalDetail() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#F8F8F8] flex items-center justify-center">
+      <div className="min-h-screen bg-surface-base flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-black border-t-transparent rounded-full animate-spin" />
       </div>
     );
@@ -162,9 +162,9 @@ export default function PortalDetail() {
 
   if (!portal) {
     return (
-      <div className="min-h-screen bg-[#F8F8F8] flex flex-col items-center justify-center text-center p-6">
+      <div className="min-h-screen bg-surface-base flex flex-col items-center justify-center text-center p-6">
         <h1 className="text-4xl font-serif mb-4">Portal not found</h1>
-        <p className="text-[#888] mb-8">This portal might have been deleted or the link is incorrect.</p>
+        <p className="text-text-secondary mb-8">This portal might have been deleted or the link is incorrect.</p>
         <Button onClick={() => navigate(ROUTES.PORTALS)}>Back to Portals</Button>
       </div>
     );
@@ -174,7 +174,7 @@ export default function PortalDetail() {
   const roundNotes = notes.filter(n => n.roundId === selectedRound?.id && !hiddenNoteIds.includes(n.id));
 
   return (
-    <div className="min-h-screen bg-[#F8F8F8] text-black">
+    <div className="min-h-screen bg-surface-base text-text-primary">
       {/* Top Bar */}
       <header className="h-20 bg-white border-b border-black/5 px-4 md:px-8 flex items-center justify-between sticky top-0 z-40 transition-stak">
         <div className="flex items-center gap-4 md:gap-6 min-w-0">

@@ -350,7 +350,7 @@ export default function ClientPortal() {
 
   if (loading || (portal && loadingRounds && rounds.length === 0)) {
     return (
-      <div className="min-h-screen bg-[#faf8f4] flex items-center justify-center">
+      <div className="min-h-screen bg-surface-base flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-black border-t-transparent rounded-full animate-spin" />
       </div>
     );
@@ -358,9 +358,9 @@ export default function ClientPortal() {
 
   if (!portal || (!loadingRounds && rounds.length === 0)) {
     return (
-      <div className="min-h-screen bg-[#faf8f4] flex flex-col items-center justify-center text-center p-6">
+      <div className="min-h-screen bg-surface-base flex flex-col items-center justify-center text-center p-6">
         <h1 className="text-4xl font-serif mb-4">Portal not found</h1>
-        <p className="text-[#888]">This link might have expired or is incorrect.</p>
+        <p className="text-text-secondary">This link might have expired or is incorrect.</p>
       </div>
     );
   }
@@ -393,7 +393,7 @@ export default function ClientPortal() {
     return null;
   }
   return (
-    <div className="min-h-screen bg-[#faf8f4] text-black selection:bg-black selection:text-white">
+    <div className="min-h-screen bg-surface-base text-text-primary selection:bg-black selection:text-white">
       <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(0,0,0,0.08)_1px,transparent_0)] [background-size:16px_16px] opacity-40" />
 
       <header className="sticky top-0 z-40 px-4 pt-3">

@@ -11,6 +11,8 @@ import { useUIStore } from './store/uiStore';
 import { CheckCircle2, AlertCircle } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import { ProtectedRoute } from './components/layout/ProtectedRoute';
+import { useEffect } from 'react';
+import { useThemeStore } from './store/themeStore';
 
 function ToastContainer() {
   const { toasts, removeToast } = useUIStore();
@@ -52,6 +54,13 @@ function ToastContainer() {
 }
 
 export default function App() {
+  const theme = useThemeStore((state) => state.theme);
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', theme === 'dark');
+    document.documentElement.style.colorScheme = theme;
+  }, [theme]);
+
   return (
     <Router>
       <Routes>

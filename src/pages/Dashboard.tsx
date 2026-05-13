@@ -21,7 +21,7 @@ export default function Dashboard() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen bg-[#F8F8F8]">
+      <div className="flex min-h-screen bg-surface-base">
         <Sidebar />
         <main className="flex-1 flex items-center justify-center lg:ml-[240px]">
           <div className="w-8 h-8 border-2 border-black border-t-transparent rounded-full animate-spin" />
@@ -31,14 +31,14 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="flex min-h-screen bg-[#F8F8F8] text-black">
+    <div className="flex min-h-screen bg-surface-base text-text-primary">
       <div className="hidden lg:block shrink-0">
         <Sidebar />
       </div>
       
       <main className="flex-1 px-4 md:px-8 lg:px-16 py-8 md:py-16 lg:ml-[240px] pb-24 lg:pb-16">
         <header className="mb-10 md:mb-14">
-          <p className="text-[#888] text-sm mb-4 font-medium">{formatDate(new Date())}</p>
+          <p className="text-text-secondary text-sm mb-4 font-medium">{formatDate(new Date())}</p>
           <h1 className="text-3xl md:text-5xl font-serif tracking-tight font-medium">
             Good morning, {profile?.displayName?.split(' ')[0] || 'Editor'}.
           </h1>
@@ -46,18 +46,18 @@ export default function Dashboard() {
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-8 mb-12 md:mb-16">
-          <div className="bg-white border border-black/5 p-6 md:p-8 rounded-sm transition-stak hover:shadow-sm">
-            <p className="text-[#888] text-xs font-semibold mb-6 uppercase tracking-widest">Active Portals</p>
+          <div className="bg-surface-raised border border-border-default p-6 md:p-8 rounded-sm transition-stak hover:shadow-sm">
+            <p className="text-text-secondary text-xs font-semibold mb-6 uppercase tracking-widest">Active Portals</p>
             <div className="flex items-baseline gap-2">
               <span className="text-3xl md:text-5xl font-serif">{stats.activePortals}</span>
-              <span className="text-[#888] text-lg md:text-xl font-serif">/ {stats.totalPortals} total</span>
+              <span className="text-text-secondary text-lg md:text-xl font-serif">/ {stats.totalPortals} total</span>
             </div>
           </div>
           
-          <div className="bg-white border border-black/5 p-6 md:p-8 rounded-sm transition-stak hover:shadow-sm">
-            <p className="text-[#888] text-xs font-semibold mb-6 uppercase tracking-widest">Recent Notes</p>
+          <div className="bg-surface-raised border border-border-default p-6 md:p-8 rounded-sm transition-stak hover:shadow-sm">
+            <p className="text-text-secondary text-xs font-semibold mb-6 uppercase tracking-widest">Recent Notes</p>
             <div className="flex items-baseline gap-4">
-              <span className="text-3xl md:text-5xl font-serif text-black">{stats.recentNotes}</span>
+              <span className="text-3xl md:text-5xl font-serif text-text-primary">{stats.recentNotes}</span>
               {stats.recentNotes > 0 && (
                 <span className="bg-[#FFE5E5] text-[#FF4444] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-sm">
                   Review
@@ -66,11 +66,11 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div className="bg-white border border-black/5 p-6 md:p-8 rounded-sm transition-stak hover:shadow-sm">
-            <p className="text-[#888] text-xs font-semibold mb-6 uppercase tracking-widest">Total Views</p>
+          <div className="bg-surface-raised border border-border-default p-6 md:p-8 rounded-sm transition-stak hover:shadow-sm">
+            <p className="text-text-secondary text-xs font-semibold mb-6 uppercase tracking-widest">Total Views</p>
             <div className="flex items-baseline gap-2">
               <span className="text-3xl md:text-5xl font-serif">{stats.totalViews}</span>
-              <span className="text-[#888] text-lg md:text-xl font-serif tracking-tight">Across all</span>
+              <span className="text-text-secondary text-lg md:text-xl font-serif tracking-tight">Across all</span>
             </div>
           </div>
         </div>
@@ -80,14 +80,14 @@ export default function Dashboard() {
           <section>
             <div className="flex items-center gap-3 mb-8">
               <h2 className="text-xl font-semibold">Portals</h2>
-              <span className="bg-black/5 text-[#888] px-2 py-0.5 rounded-full text-[11px] font-bold">{portals.length}</span>
+              <span className="bg-black/5 text-text-secondary px-2 py-0.5 rounded-full text-[11px] font-bold">{portals.length}</span>
             </div>
             
             <div className="space-y-4">
               {typedPortals.length > 0 ? typedPortals.slice(0, 5).map((portal) => (
                 <div 
                   key={portal.id} 
-                  className="bg-white border border-black/5 p-4 rounded-sm flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 group cursor-pointer transition-stak hover:border-black/20"
+                  className="bg-surface-raised border border-border-default p-4 rounded-sm flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 group cursor-pointer transition-stak hover:border-black/20"
                   onClick={() => navigate(ROUTES.PORTAL_DETAIL(portal.id))}
                 >
                   <div className="flex-1 min-w-0">
@@ -95,13 +95,13 @@ export default function Dashboard() {
                        <div className="flex items-center gap-3 truncate">
                           <div className={cn(
                             "w-10 h-10 rounded-full border flex items-center justify-center shrink-0 transition-stak",
-                            portal.status === 'active' ? "bg-black text-white border-black" : "bg-black/5 border-black/10 text-[#999]"
+                            portal.status === 'active' ? "bg-brand-primary text-text-inverse border-brand-primary" : "bg-black/5 border-border-default text-text-tertiary"
                           )}>
                              <User size={16} />
                           </div>
                           <div>
                             <h3 className="text-lg font-medium truncate">{portal.title}</h3>
-                            <p className="text-xs text-[#888] font-medium tracking-tight">Client: {portal.clientName}</p>
+                            <p className="text-xs text-text-secondary font-medium tracking-tight">Client: {portal.clientName}</p>
                           </div>
                        </div>
                       <span className={cn(
@@ -121,7 +121,7 @@ export default function Dashboard() {
                 </div>
               )) : (
                 <div className="p-16 border border-dashed border-black/10 rounded-sm text-center">
-                  <p className="text-[#888] text-sm">No portals yet</p>
+                  <p className="text-text-secondary text-sm">No portals yet</p>
                   <Button 
                     variant="primary" 
                     className="mt-4"
@@ -137,7 +137,7 @@ export default function Dashboard() {
           {/* Recent Activity */}
           <section>
              <h2 className="text-xl font-semibold mb-8">Recent Activity</h2>
-             <div className="bg-white border border-black/5 p-8 rounded-sm">
+             <div className="bg-surface-raised border border-border-default p-8 rounded-sm">
                 <div className="space-y-8 relative before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-px before:bg-black/5">
                   {visibleActivity.length > 0 ? visibleActivity.map((act: any) => (
                     <ActivityItem 
@@ -162,21 +162,21 @@ export default function Dashboard() {
                       time={formatRelativeTime(act.timestamp)}
                     />
                   )) : (
-                    <p className="text-sm text-[#888] italic">No recent activity</p>
+                    <p className="text-sm text-text-secondary italic">No recent activity</p>
                   )}
                 </div>
                 {recentActivity.length > 5 ? (
                   <button
                     type="button"
                     onClick={() => setShowAllActivity((current) => !current)}
-                    className="w-full mt-10 py-3 border-t border-black/5 text-[#888] text-sm hover:text-black transition-stak font-medium"
+                    className="w-full mt-10 py-3 border-t border-border-default text-text-secondary text-sm hover:text-text-primary transition-stak font-medium"
                   >
                     {showAllActivity ? 'Show less activity' : `Show more activity (${recentActivity.length - 5})`}
                   </button>
                 ) : (
                   <button 
                     onClick={() => navigate(ROUTES.PORTALS)}
-                    className="w-full mt-12 py-3 border-t border-black/5 text-[#888] text-sm hover:text-black transition-stak font-medium"
+                    className="w-full mt-12 py-3 border-t border-border-default text-text-secondary text-sm hover:text-text-primary transition-stak font-medium"
                   >
                     Manage Portals
                   </button>

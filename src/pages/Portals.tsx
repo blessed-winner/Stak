@@ -76,7 +76,7 @@ export default function Portals() {
   });
 
   return (
-    <div className="flex min-h-screen bg-[#F8F8F8] text-black">
+    <div className="flex min-h-screen bg-surface-base text-text-primary">
       <div className="hidden lg:block shrink-0">
         <Sidebar />
       </div>
@@ -85,7 +85,7 @@ export default function Portals() {
           <h1 className="text-4xl md:text-5xl font-serif tracking-tight font-medium">Portals</h1>
           <button 
             onClick={() => navigate(ROUTES.PORTALS_NEW)}
-            className="bg-black text-white px-8 py-3 rounded-sm text-sm font-semibold hover:bg-black/90 transition-stak flex items-center gap-2"
+            className="bg-brand-primary text-text-inverse px-8 py-3 rounded-sm text-sm font-semibold hover:opacity-90 transition-stak flex items-center gap-2"
           >
             <Plus size={18} />
             New portal
@@ -93,7 +93,7 @@ export default function Portals() {
         </header>
 
         {/* Filter Bar */}
-        <div className="mb-6 md:mb-10 border-b border-black/5 overflow-x-auto scrollbar-hide">
+        <div className="mb-6 md:mb-10 border-b border-border-default overflow-x-auto scrollbar-hide">
           <div className="flex items-center gap-6 md:gap-10 whitespace-nowrap min-w-max">
             {TABS.map((tab) => (
               <button
@@ -101,7 +101,7 @@ export default function Portals() {
                 onClick={() => setFilter(tab.id)}
                 className={cn(
                   "pb-4 text-sm font-medium transition-stak relative",
-                  filter === tab.id ? "text-black" : "text-[#888] hover:text-black"
+                  filter === tab.id ? "text-text-primary" : "text-text-secondary hover:text-text-primary"
                 )}
               >
                 {tab.label}
@@ -118,18 +118,18 @@ export default function Portals() {
 
         {/* Search */}
         <div className="mb-8 relative">
-          <Search size={18} className="absolute left-6 top-1/2 -translate-y-1/2 text-[#888]" />
+          <Search size={18} className="absolute left-6 top-1/2 -translate-y-1/2 text-text-secondary" />
           <input 
             type="text"
             placeholder="Search portals, clients, or projects..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-white border border-black/5 rounded-sm pl-14 pr-6 py-5 text-sm focus:outline-none focus:border-black/20 transition-stak"
+            className="w-full bg-surface-raised border border-border-default rounded-sm pl-14 pr-6 py-5 text-sm focus:outline-none focus:border-black/20 transition-stak"
           />
         </div>
 
         {/* Portals Table / Mobile Cards */}
-        <div className="bg-white border border-black/5 rounded-sm overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.02)]">
+        <div className="bg-surface-raised border border-border-default rounded-sm overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.02)]">
           <div className="overflow-x-auto">
             <table className="w-full text-left min-w-[800px] lg:min-w-0">
             <thead>

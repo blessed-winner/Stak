@@ -6,6 +6,7 @@ import { MobileNav } from '../components/layout/MobileNav';
 import { Sidebar } from '../components/layout/Sidebar';
 import { cn, slugify } from '../lib/utils';
 import { supabase } from '../lib/supabase';
+import { useThemeStore } from '../store/themeStore';
 
 const NOTIFICATION_KEYS = [
   'portalViewed',
@@ -18,6 +19,7 @@ type NotificationKey = (typeof NOTIFICATION_KEYS)[number];
 export default function Settings() {
   const { profile, signOut, setProfile } = useAuthStore();
   const { stats } = useDashboard();
+  const { theme, setTheme } = useThemeStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [saving, setSaving] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
@@ -155,13 +157,13 @@ export default function Settings() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f7f5f1] text-black">
+    <div className="min-h-screen bg-surface-base text-text-primary">
       <Sidebar />
       <main className="px-4 py-8 md:px-8 md:py-10 lg:ml-[240px] lg:px-12 xl:px-16">
           <div className="mx-auto max-w-4xl">
             <header className="mb-10 md:mb-12">
               <h1 className="font-serif text-4xl tracking-tight md:text-5xl">Settings</h1>
-              <p className="mt-2 text-sm text-black/55">Manage your account and preferences.</p>
+              <p className="mt-2 text-sm text-text-secondary">Manage your account and preferences.</p>
             </header>
 
             <div className="space-y-10">
@@ -251,6 +253,40 @@ export default function Settings() {
                     <span className="text-xs text-black/35">Changes sync to your profile immediately.</span>
                   </div>
                 </form>
+              </section>
+
+              <section>
+                <div className="mb-4 flex items-center justify-between border-b border-border-default pb-3">
+                  <h2 className="text-sm font-semibold uppercase tracking-[0.18em]">Theme</h2>
+                  <span className="text-[10px] uppercase tracking-[0.22em] text-text-tertiary">Appearance</span>
+                </div>
+
+                <div className="border border-border-default bg-surface-raised p-5 shadow-[0_12px_30px_rgba(0,0,0,0.04)] md:p-7">
+                  <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                    <div>
+                      <h3 className="text-lg font-semibold">Dark mode</h3>
+                      <p className="mt-1 text-sm text-text-secondary">Switch the app between the light and dark palette.</p>
+                    </div>
+
+                    <div className="inline-flex rounded-sm border border-border-default bg-surface-overlay p-1">
+                      {(['light', 'dark'] as const).map((option) => (
+                        <button
+                          key={option}
+                          type="button"
+                          onClick={() => setTheme(option)}
+                          className={cn(
+                            'px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] transition-colors',
+                            theme === option
+                              ? 'bg-brand-primary text-text-inverse'
+                              : 'text-text-secondary hover:text-text-primary',
+                          )}
+                        >
+                          {option}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
               </section>
 
               <section>

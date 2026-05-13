@@ -42,11 +42,101 @@
   -webkit-font-smoothing: antialiased;
 }
 
+html.dark {
+  color-scheme: dark;
+  --color-surface-base: #0e0e11;
+  --color-surface-raised: #16161a;
+  --color-surface-overlay: #1f1f25;
+  --color-surface-hover: #26262d;
+
+  --color-brand-primary: #f0f0f0;
+  --color-brand-dim: #d8d8d8;
+  --color-brand-ghost: rgba(255, 255, 255, 0.04);
+
+  --color-text-primary: #f0f0f0;
+  --color-text-secondary: #a2a2b3;
+  --color-text-tertiary: #6f6f80;
+  --color-text-inverse: #0e0e11;
+
+  --color-border-subtle: rgba(255, 255, 255, 0.04);
+  --color-border-default: rgba(255, 255, 255, 0.08);
+  --color-border-strong: rgba(255, 255, 255, 0.16);
+
+  --color-success: #34d399;
+  --color-warning: #fbbf24;
+  --color-error: #f87171;
+  --color-info: #60a5fa;
+}
+
 body {
   background-color: var(--color-surface-base);
   background-image: 
     radial-gradient(circle, #E0E0E0 1px, transparent 1px);
   background-size: 28px 28px;
+}
+
+html.dark body {
+  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+}
+
+html.dark .bg-white {
+  background-color: var(--color-surface-raised);
+}
+
+html.dark .text-black {
+  color: var(--color-text-primary);
+}
+
+html.dark .text-white {
+  color: var(--color-text-inverse);
+}
+
+html.dark .bg-black {
+  background-color: #f0f0f0;
+}
+
+html.dark .bg-black\/5,
+html.dark .bg-black\/10,
+html.dark .bg-black\/20,
+html.dark .bg-black\/\[0\.01\],
+html.dark .bg-black\/\[0\.02\] {
+  background-color: var(--color-surface-overlay);
+}
+
+html.dark .border-black\/5,
+html.dark .border-black\/10,
+html.dark .border-black\/20 {
+  border-color: var(--color-border-default);
+}
+
+html.dark .text-\[\#888\],
+html.dark .text-\[\#999\],
+html.dark .text-\[\#BBB\],
+html.dark .text-\[\#CCC\] {
+  color: var(--color-text-secondary);
+}
+
+html.dark .text-black\/28,
+html.dark .text-black\/30,
+html.dark .text-black\/35,
+html.dark .text-black\/40,
+html.dark .text-black\/45,
+html.dark .text-black\/50,
+html.dark .text-black\/55,
+html.dark .text-black\/60,
+html.dark .text-black\/65,
+html.dark .text-black\/70,
+html.dark .text-black\/75,
+html.dark .text-black\/85 {
+  color: var(--color-text-secondary);
+}
+
+html.dark .shadow-\[0_12px_35px_rgba\(0\,0\,0\,0\.08\)\],
+html.dark .shadow-\[0_12px_36px_rgba\(0\,0\,0\,0\.10\)\],
+html.dark .shadow-\[0_10px_28px_rgba\(0\,0\,0\,0\.06\)\],
+html.dark .shadow-\[0_8px_20px_rgba\(0\,0\,0\,0\.04\)\],
+html.dark .shadow-\[0_4px_20px_rgba\(0\,0\,0\,0\.02\)\] {
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
 }
 
 h1, .font-serif {
@@ -66,4 +156,3 @@ h1, .font-serif {
 
 /* Custom shadow tokens based on variables if needed, 
    but Tailwind 4 handles shadows via variables too if defined. */
-
