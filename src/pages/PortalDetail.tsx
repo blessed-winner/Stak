@@ -112,8 +112,8 @@ export default function PortalDetail() {
   const handleDeleteNote = async (noteId: string) => {
     try {
       await deleteNote(noteId);
-      setHiddenNoteIds(prev => [...prev, noteId]);
       await refreshPortal();
+      setHiddenNoteIds(prev => [...prev, noteId]);
       addToast('Note deleted', 'success');
       setDeleteTarget(null);
     } catch (error: any) {
