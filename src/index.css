@@ -44,19 +44,19 @@
 
 html.dark {
   color-scheme: dark;
-  --color-surface-base: #0e0e11;
-  --color-surface-raised: #16161a;
-  --color-surface-overlay: #1f1f25;
-  --color-surface-hover: #26262d;
+  --color-surface-base: #0b0d10;
+  --color-surface-raised: #12151a;
+  --color-surface-overlay: #181c22;
+  --color-surface-hover: #1f242c;
 
-  --color-brand-primary: #f0f0f0;
-  --color-brand-dim: #d8d8d8;
+  --color-brand-primary: #f2f2f2;
+  --color-brand-dim: #d7dbe3;
   --color-brand-ghost: rgba(255, 255, 255, 0.04);
 
-  --color-text-primary: #f0f0f0;
-  --color-text-secondary: #a2a2b3;
-  --color-text-tertiary: #6f6f80;
-  --color-text-inverse: #0e0e11;
+  --color-text-primary: #f2f2f2;
+  --color-text-secondary: #b0b5c2;
+  --color-text-tertiary: #7f8694;
+  --color-text-inverse: #0b0d10;
 
   --color-border-subtle: rgba(255, 255, 255, 0.04);
   --color-border-default: rgba(255, 255, 255, 0.08);
@@ -76,10 +76,21 @@ body {
 }
 
 html.dark body {
-  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
 }
 
-html.dark .bg-white {
+html.dark .bg-white,
+html.dark .bg-white\/80,
+html.dark .bg-white\/90,
+html.dark .bg-white\/95,
+html.dark .bg-\[\#F8F8F8\],
+html.dark .bg-\[\#faf8f4\],
+html.dark .bg-\[\#f7f5f1\],
+html.dark .bg-\[\#f7f7f7\],
+html.dark .bg-\[\#f5f3f0\],
+html.dark .bg-\[\#f4f4f4\],
+html.dark .bg-\[\#ede9e4\],
+html.dark .bg-\[\#F9F9F9\] {
   background-color: var(--color-surface-raised);
 }
 
@@ -87,17 +98,16 @@ html.dark .text-black {
   color: var(--color-text-primary);
 }
 
-html.dark .text-white {
-  color: var(--color-text-inverse);
-}
-
-html.dark .bg-black {
-  background-color: #f0f0f0;
-}
-
 html.dark .bg-black\/5,
 html.dark .bg-black\/10,
 html.dark .bg-black\/20,
+html.dark .bg-black\/30,
+html.dark .bg-black\/40,
+html.dark .bg-black\/50,
+html.dark .bg-black\/60,
+html.dark .bg-black\/70,
+html.dark .bg-black\/80,
+html.dark .bg-black\/90,
 html.dark .bg-black\/\[0\.01\],
 html.dark .bg-black\/\[0\.02\] {
   background-color: var(--color-surface-overlay);
