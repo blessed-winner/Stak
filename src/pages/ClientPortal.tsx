@@ -314,6 +314,9 @@ export default function ClientPortal() {
         feedback,
         submissionTimestamp,
       );
+      if (currentTime !== null) {
+        updatePlaybackTimestamp(currentTime);
+      }
       setFeedback('');
       await refreshNotes();
     } catch (error) {
@@ -369,6 +372,10 @@ export default function ClientPortal() {
   ].filter(Boolean).join(' | ');
 
   async function readCurrentTimestamp() {
+    if (playbackSecondsRef.current !== null) {
+      return playbackSecondsRef.current;
+    }
+
     if (videoRef.current) {
       return videoRef.current.currentTime;
     }
@@ -381,10 +388,6 @@ export default function ClientPortal() {
     if (vimeoPlayerRef.current?.getCurrentTime) {
       const currentTime = await vimeoPlayerRef.current.getCurrentTime();
       return typeof currentTime === 'number' && Number.isFinite(currentTime) ? currentTime : null;
-    }
-
-    if (playbackSecondsRef.current !== null) {
-      return playbackSecondsRef.current;
     }
 
     return null;
