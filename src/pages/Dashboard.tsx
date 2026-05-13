@@ -106,7 +106,11 @@ export default function Dashboard() {
                        </div>
                       <span className={cn(
                         "px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider rounded-sm shrink-0",
-                        portal.status === 'active' ? "bg-black/5 text-black" : "bg-[#FFE5E5] text-[#FF4444]"
+                        portal.status === 'active'
+                          ? "bg-black/5 text-black"
+                          : portal.status === 'approved'
+                            ? "bg-[#D1FAE5] text-[#059669]"
+                            : "bg-[#FFE5E5] text-[#FF4444]"
                       )}>
                         {portal.status}
                       </span>
