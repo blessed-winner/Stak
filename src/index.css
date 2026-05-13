@@ -73,6 +73,7 @@ body {
   background-image: 
     radial-gradient(circle, #E0E0E0 1px, transparent 1px);
   background-size: 28px 28px;
+  cursor: default;
 }
 
 html.dark body {
@@ -162,6 +163,22 @@ h1, .font-serif {
 /* Custom transitions */
 .transition-stak {
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+button,
+a,
+[role="button"],
+[type="button"],
+[type="submit"],
+.cursor-pointer {
+  cursor: pointer;
+}
+
+input,
+textarea,
+select,
+[contenteditable="true"] {
+  cursor: text;
 }
 
 /* Custom shadow tokens based on variables if needed, 
