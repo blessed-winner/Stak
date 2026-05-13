@@ -111,6 +111,41 @@ export default function ClientPortal() {
     setTimestamp(seconds === null ? '--:--' : formatPlaybackTime(seconds));
   };
 
+  const pollEmbeddedPlayback = () => {
+    if (youtubePlayerRef.current?.getCurrentTime) {
+      const currentTime = youtubePlayerRef.current.getCurrentTime();
+      if (typeof currentTime === 'number' && Number.isFinite(currentTime)) {
+        updatePlaybackTimestamp(currentTime);
+      }
+
+      const totalDuration = youtubePlayerRef.current.getDuration?.();
+      if (typeof totalDuration === 'number' && totalDuration > 0) {
+        setDuration(formatPlaybackTime(totalDuration));
+      }
+      return;
+    }
+
+    if (vimeoPlayerRef.current?.getCurrentTime) {
+      void vimeoPlayerRef.current.getCurrentTime().then((currentTime: number) => {
+        if (typeof currentTime === 'number' && Number.isFinite(currentTime)) {
+          updatePlaybackTimestamp(currentTime);
+        }
+      });
+
+      void vimeoPlayerRef.current.getDuration().then((totalDuration: number) => {
+        if (typeof totalDuration === 'number' && totalDuration > 0) {
+          setDuration(formatPlaybackTime(totalDuration));
+        }
+      });
+    }
+  };
+
+  const startPlaybackPolling = () => {
+    if (playbackTimerRef.current) return;
+    playbackTimerRef.current = window.setInterval(pollEmbeddedPlayback, 250);
+    pollEmbeddedPlayback();
+  };
+
   const handleTimeUpdate = () => {
     if (!videoRef.current) return;
 
@@ -200,28 +235,10 @@ export default function ClientPortal() {
               const totalDuration = event.target.getDuration?.();
               if (typeof currentTime === 'number') updatePlaybackTimestamp(currentTime);
               if (typeof totalDuration === 'number' && totalDuration > 0) setDuration(formatPlaybackTime(totalDuration));
+              startPlaybackPolling();
             },
-            onStateChange: (event: any) => {
-              if (!window.YT) return;
-
-              if (event.data === window.YT.PlayerState.PLAYING) {
-                if (playbackTimerRef.current) window.clearInterval(playbackTimerRef.current);
-                playbackTimerRef.current = window.setInterval(() => {
-                  const currentTime = youtubePlayerRef.current?.getCurrentTime?.();
-                  const totalDuration = youtubePlayerRef.current?.getDuration?.();
-                  if (typeof currentTime === 'number') updatePlaybackTimestamp(currentTime);
-                  if (typeof totalDuration === 'number' && totalDuration > 0) setDuration(formatPlaybackTime(totalDuration));
-                }, 250);
-              } else {
-                if (playbackTimerRef.current) {
-                  window.clearInterval(playbackTimerRef.current);
-                  playbackTimerRef.current = null;
-                }
-                const currentTime = event.target.getCurrentTime?.();
-                const totalDuration = event.target.getDuration?.();
-                if (typeof currentTime === 'number') updatePlaybackTimestamp(currentTime);
-                if (typeof totalDuration === 'number' && totalDuration > 0) setDuration(formatPlaybackTime(totalDuration));
-              }
+            onStateChange: () => {
+              pollEmbeddedPlayback();
             },
           },
         });
@@ -244,6 +261,7 @@ export default function ClientPortal() {
           } catch {
             // Ignore load-time duration failures.
           }
+          startPlaybackPolling();
         });
         vimeoPlayerRef.current.on('timeupdate', (data: any) => {
           if (typeof data.seconds === 'number') updatePlaybackTimestamp(data.seconds);
@@ -270,21 +288,8 @@ export default function ClientPortal() {
 
     setIsSubmitting(true);
     try {
-      let submissionTimestamp: string | undefined;
-
-      if (videoRef.current) {
-        submissionTimestamp = formatPlaybackTime(videoRef.current.currentTime);
-      } else if (videoProvider === 'youtube' && youtubePlayerRef.current?.getCurrentTime) {
-        const currentTime = youtubePlayerRef.current.getCurrentTime();
-        submissionTimestamp = typeof currentTime === 'number' ? formatPlaybackTime(currentTime) : undefined;
-      } else if (videoProvider === 'vimeo' && vimeoPlayerRef.current?.getCurrentTime) {
-        const currentTime = await vimeoPlayerRef.current.getCurrentTime();
-        submissionTimestamp = typeof currentTime === 'number' ? formatPlaybackTime(currentTime) : undefined;
-      } else if (playbackSecondsRef.current !== null) {
-        submissionTimestamp = formatPlaybackTime(playbackSecondsRef.current);
-      } else if (timestamp !== '--:--') {
-        submissionTimestamp = timestamp;
-      }
+      const currentTime = await readCurrentTimestamp();
+      const submissionTimestamp = currentTime !== null ? formatPlaybackTime(currentTime) : undefined;
 
       await submitRevision(
         portal.id,
@@ -345,6 +350,28 @@ export default function ClientPortal() {
     duration !== '--:--' ? duration : null,
     formatDate(currentRound?.uploadedAt),
   ].filter(Boolean).join(' | ');
+
+  async function readCurrentTimestamp() {
+    if (videoRef.current) {
+      return videoRef.current.currentTime;
+    }
+
+    if (youtubePlayerRef.current?.getCurrentTime) {
+      const currentTime = youtubePlayerRef.current.getCurrentTime();
+      return typeof currentTime === 'number' && Number.isFinite(currentTime) ? currentTime : null;
+    }
+
+    if (vimeoPlayerRef.current?.getCurrentTime) {
+      const currentTime = await vimeoPlayerRef.current.getCurrentTime();
+      return typeof currentTime === 'number' && Number.isFinite(currentTime) ? currentTime : null;
+    }
+
+    if (playbackSecondsRef.current !== null) {
+      return playbackSecondsRef.current;
+    }
+
+    return null;
+  }
   return (
     <div className="min-h-screen bg-[#faf8f4] text-black selection:bg-black selection:text-white">
       <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(0,0,0,0.08)_1px,transparent_0)] [background-size:16px_16px] opacity-40" />
