@@ -302,7 +302,7 @@ export default function Settings() {
                       <h3 className="mt-1 text-2xl font-serif">{profile?.plan ? profile.plan.charAt(0).toUpperCase() + profile.plan.slice(1) : 'Free'}</h3>
                     </div>
                     <div className="text-right">
-                      <div className="text-3xl font-serif text-black/85">$29<span className="text-sm text-black/45">/mo</span></div>
+                      <div className="text-3xl font-serif text-black/85">$9<span className="text-sm text-black/45">/mo</span></div>
                     </div>
                   </div>
 
