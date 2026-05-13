@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { cn, getEmbedUrl, formatDate } from '../lib/utils';
+import { cn, formatDate } from '../lib/utils';
 import { ArrowRight, CheckCircle2, Clock, Play, User } from 'lucide-react';
 import { getClientPortal, useClientNotes, useClientRounds, submitRevision } from '../hooks/useClientPortal';
 import { approvePortal } from '../hooks/usePortal';
@@ -68,6 +68,12 @@ function getVideoProvider(url?: string | null) {
   return 'direct';
 }
 
+function extractYouTubeVideoId(url?: string | null) {
+  if (!url) return null;
+  const match = url.match(/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/);
+  return match?.[1] || null;
+}
+
 export default function ClientPortal() {
   const { editorSlug, portalSlug } = useParams<{ editorSlug: string; portalSlug: string }>();
   const [portal, setPortal] = useState<Portal | null>(null);
@@ -79,7 +85,7 @@ export default function ClientPortal() {
   const [duration, setDuration] = useState('--:--');
   const [videoProgress, setVideoProgress] = useState(0);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const playerContainerRef = useRef<HTMLDivElement>(null);
   const youtubePlayerRef = useRef<any>(null);
   const vimeoPlayerRef = useRef<any>(null);
   const playbackSecondsRef = useRef<number | null>(null);
@@ -91,22 +97,7 @@ export default function ClientPortal() {
   const currentNotes = notes.filter((note) => note.roundId === currentRound?.id && note.authorRole === 'client');
   const visibleNotes = currentNotes.slice(0, 3);
   const videoProvider = getVideoProvider(currentRound?.videoUrl);
-  const embedUrl = currentRound?.videoUrl ? getEmbedUrl(currentRound.videoUrl) : null;
-  const playableEmbedUrl = embedUrl && videoProvider === 'youtube'
-    ? (() => {
-        const url = new URL(embedUrl);
-        url.searchParams.set('enablejsapi', '1');
-        url.searchParams.set('origin', window.location.origin);
-        url.searchParams.set('rel', '0');
-        return url.toString();
-      })()
-    : embedUrl && videoProvider === 'vimeo'
-      ? (() => {
-          const url = new URL(embedUrl);
-          url.searchParams.set('api', '1');
-          return url.toString();
-        })()
-      : embedUrl;
+  const youtubeVideoId = extractYouTubeVideoId(currentRound?.videoUrl);
 
   const formatPlaybackTime = (seconds: number) => {
     const safeSeconds = Number.isFinite(seconds) && seconds >= 0 ? seconds : 0;
@@ -178,7 +169,7 @@ export default function ClientPortal() {
   }, [currentRound?.id]);
 
   useEffect(() => {
-    if (currentRound?.videoUrl && videoProvider !== 'youtube') {
+    if (currentRound?.videoUrl && videoProvider === 'direct') {
       getVideoDuration(currentRound.videoUrl).then(setDuration);
     }
   }, [currentRound?.videoUrl, videoProvider]);
@@ -187,13 +178,22 @@ export default function ClientPortal() {
     let isCancelled = false;
 
     async function bindEmbeddedPlayer() {
-      if (!currentRound?.videoUrl || !playableEmbedUrl || !iframeRef.current) return;
+      if (!currentRound?.videoUrl || !playerContainerRef.current) return;
 
       if (videoProvider === 'youtube') {
+        if (!youtubeVideoId) return;
         await ensureYouTubeApi();
-        if (isCancelled || !window.YT?.Player || !iframeRef.current) return;
+        if (isCancelled || !window.YT?.Player || !playerContainerRef.current) return;
 
-        youtubePlayerRef.current = new window.YT.Player(iframeRef.current, {
+        youtubePlayerRef.current = new window.YT.Player(playerContainerRef.current, {
+          videoId: youtubeVideoId,
+          width: '100%',
+          height: '100%',
+          playerVars: {
+            origin: window.location.origin,
+            rel: 0,
+            modestbranding: 1,
+          },
           events: {
             onReady: (event: any) => {
               const currentTime = event.target.getCurrentTime?.();
@@ -229,9 +229,12 @@ export default function ClientPortal() {
 
       if (videoProvider === 'vimeo') {
         await ensureVimeoApi();
-        if (isCancelled || !window.Vimeo?.Player || !iframeRef.current) return;
+        if (isCancelled || !window.Vimeo?.Player || !playerContainerRef.current) return;
 
-        vimeoPlayerRef.current = new window.Vimeo.Player(iframeRef.current);
+        vimeoPlayerRef.current = new window.Vimeo.Player(playerContainerRef.current, {
+          url: currentRound.videoUrl,
+          responsive: true,
+        });
         vimeoPlayerRef.current.on('loaded', async () => {
           try {
             const totalDuration = await vimeoPlayerRef.current.getDuration();
@@ -259,7 +262,7 @@ export default function ClientPortal() {
         playbackTimerRef.current = null;
       }
     };
-  }, [currentRound?.videoUrl, playableEmbedUrl, videoProvider]);
+  }, [currentRound?.videoUrl, videoProvider, youtubeVideoId]);
 
   const handleSubmitFeedback = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -267,16 +270,27 @@ export default function ClientPortal() {
 
     setIsSubmitting(true);
     try {
-      const submissionTimestamp = playbackSecondsRef.current !== null
-        ? formatPlaybackTime(playbackSecondsRef.current)
-        : videoRef.current
-          ? formatPlaybackTime(videoRef.current.currentTime)
-          : timestamp;
+      let submissionTimestamp: string | undefined;
+
+      if (videoRef.current) {
+        submissionTimestamp = formatPlaybackTime(videoRef.current.currentTime);
+      } else if (videoProvider === 'youtube' && youtubePlayerRef.current?.getCurrentTime) {
+        const currentTime = youtubePlayerRef.current.getCurrentTime();
+        submissionTimestamp = typeof currentTime === 'number' ? formatPlaybackTime(currentTime) : undefined;
+      } else if (videoProvider === 'vimeo' && vimeoPlayerRef.current?.getCurrentTime) {
+        const currentTime = await vimeoPlayerRef.current.getCurrentTime();
+        submissionTimestamp = typeof currentTime === 'number' ? formatPlaybackTime(currentTime) : undefined;
+      } else if (playbackSecondsRef.current !== null) {
+        submissionTimestamp = formatPlaybackTime(playbackSecondsRef.current);
+      } else if (timestamp !== '--:--') {
+        submissionTimestamp = timestamp;
+      }
+
       await submitRevision(
         portal.id,
         currentRound.id,
         feedback,
-        submissionTimestamp === '--:--' ? undefined : submissionTimestamp,
+        submissionTimestamp,
       );
       setFeedback('');
       await refreshNotes();
@@ -392,14 +406,10 @@ export default function ClientPortal() {
 
         <section className="overflow-hidden border border-black/10 bg-white shadow-[0_12px_36px_rgba(0,0,0,0.10)]">
           <div className="relative bg-black">
-            {playableEmbedUrl?.includes('youtube.com') || playableEmbedUrl?.includes('vimeo.com') ? (
-              <iframe
-                ref={iframeRef}
-                src={playableEmbedUrl}
+            {videoProvider === 'youtube' || videoProvider === 'vimeo' ? (
+              <div
+                ref={playerContainerRef}
                 className="aspect-video w-full"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-                title={currentRound?.title || 'Video preview'}
               />
             ) : currentRound?.videoUrl ? (
               <video
@@ -420,7 +430,7 @@ export default function ClientPortal() {
               </div>
             )}
 
-            {currentRound?.videoUrl && !embedUrl && (
+            {currentRound?.videoUrl && videoProvider === 'direct' && (
               <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/10">
                 <div
                   className="h-full bg-white/70 transition-[width] duration-150"
