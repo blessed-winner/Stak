@@ -279,9 +279,14 @@ export default function PortalDetail() {
               </AnimatePresence>
             </div>
 
-            <div className="w-9 h-9 rounded-full bg-surface-overlay border border-border-default flex items-center justify-center text-text-tertiary">
+            <button
+              type="button"
+              onClick={() => navigate(ROUTES.SETTINGS)}
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-border-default bg-surface-overlay text-text-tertiary transition-stak hover:bg-surface-hover hover:text-text-primary"
+              aria-label="Open settings"
+            >
               <User size={18} />
-            </div>
+            </button>
           </div>
         </div>
 
