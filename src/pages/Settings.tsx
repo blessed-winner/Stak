@@ -86,6 +86,7 @@ export default function Settings() {
     try {
       let nextAvatarUrl = profile.avatarUrl || null;
       let avatarUploadWarning = false;
+      let avatarColumnMissing = false;
 
       if (avatarFile) {
         setUploadingAvatar(true);
@@ -106,19 +107,44 @@ export default function Settings() {
 
       const nextSlug = slugify(formData.slug || formData.displayName || formData.fullName || 'editor');
 
-      const { data: updatedProfile, error } = await supabase
+      const profilePayload = {
+        full_name: formData.fullName,
+        display_name: formData.displayName,
+        slug: nextSlug,
+        avatar_url: nextAvatarUrl,
+      };
+
+      let updatedProfile: any = null;
+      let updateError: any = null;
+
+      const firstAttempt = await supabase
         .from('profiles')
-        .update({
-          full_name: formData.fullName,
-          display_name: formData.displayName,
-          slug: nextSlug,
-          avatar_url: nextAvatarUrl,
-        })
+        .update(profilePayload)
         .eq('id', profile.id)
         .select('*')
         .single();
 
-      if (error) throw error;
+      updatedProfile = firstAttempt.data;
+      updateError = firstAttempt.error;
+
+      if (updateError?.message?.toLowerCase?.().includes("avatar_url") || updateError?.code === 'PGRST204') {
+        avatarColumnMissing = true;
+        const retryAttempt = await supabase
+          .from('profiles')
+          .update({
+            full_name: formData.fullName,
+            display_name: formData.displayName,
+            slug: nextSlug,
+          })
+          .eq('id', profile.id)
+          .select('*')
+          .single();
+
+        updatedProfile = retryAttempt.data;
+        updateError = retryAttempt.error;
+      }
+
+      if (updateError) throw updateError;
 
       setProfile({
         id: updatedProfile.id,
@@ -136,6 +162,8 @@ export default function Settings() {
 
       if (avatarUploadWarning) {
         alert('Profile changes saved. Avatar upload was skipped because the storage bucket is missing.');
+      } else if (avatarColumnMissing) {
+        alert('Profile changes saved, but your database is missing the avatar_url column. Add it to store uploaded avatars.');
       }
     } catch (error: any) {
       console.error(error);

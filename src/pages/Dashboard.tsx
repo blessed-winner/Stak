@@ -124,8 +124,8 @@ export default function Dashboard() {
                   <p className="text-text-secondary text-sm">No portals yet</p>
                   <Button 
                     variant="primary" 
-                    className="mt-4"
-                    onClick={() => navigate(ROUTES.PORTALS)}
+                    className="first-portal-cta mt-4"
+                    onClick={() => navigate(ROUTES.PORTALS_NEW)}
                   >
                     Create your first portal
                   </Button>
