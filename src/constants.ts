@@ -28,4 +28,5 @@ export const ROUTES = {
   PORTAL_DETAIL: (id: string) => `/portals/${id}`,
   CLIENT_PORTAL: (editorSlug: string, portalSlug: string) => `/${editorSlug}/${portalSlug}`,
   SETTINGS: '/settings',
+  SUPPORT: '/support',
 };

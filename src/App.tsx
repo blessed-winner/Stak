@@ -6,6 +6,7 @@ import PortalNew from './pages/PortalNew';
 import PortalDetail from './pages/PortalDetail';
 import ClientPortal from './pages/ClientPortal';
 import Settings from './pages/Settings';
+import Support from './pages/Support';
 import { ROUTES } from './constants';
 import { useUIStore } from './store/uiStore';
 import { CheckCircle2, AlertCircle } from 'lucide-react';
@@ -74,6 +75,7 @@ export default function App() {
         <Route path="/portals/:id" element={<ProtectedRoute><PortalDetail /></ProtectedRoute>} />
         <Route path="/p/:editorSlug/:portalSlug" element={<ClientPortal />} />
         <Route path={ROUTES.SETTINGS} element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+        <Route path={ROUTES.SUPPORT} element={<ProtectedRoute><Support /></ProtectedRoute>} />
 
         <Route path="*" element={<Navigate to={ROUTES.DASHBOARD} replace />} />
       </Routes>

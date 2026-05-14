@@ -9,6 +9,7 @@ const NAV_ITEMS = [
   { label: 'Dashboard', icon: LayoutDashboard, path: ROUTES.DASHBOARD },
   { label: 'Portals', icon: Play, path: ROUTES.PORTALS }, 
   { label: 'Settings', icon: Settings, path: ROUTES.SETTINGS },
+  { label: 'Support', icon: HelpCircle, path: ROUTES.SUPPORT },
 ];
 
 export function Sidebar() {
@@ -81,11 +82,6 @@ export function Sidebar() {
           </div>
 
           <div className="space-y-4">
-            <a href="#" className="flex items-center gap-4 px-2 py-1 text-text-secondary hover:text-text-primary transition-stak">
-              <HelpCircle size={20} strokeWidth={1.5} />
-              <span className="text-sm font-medium">Support</span>
-            </a>
-
             <div className="pt-6 border-t border-border-default flex items-center justify-between gap-3 px-2">
               <div className="flex items-center gap-3 overflow-hidden">
                 <div className="w-8 h-8 rounded-full bg-surface-overlay shrink-0 border border-border-default flex items-center justify-center text-text-tertiary">
