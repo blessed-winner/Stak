@@ -340,7 +340,7 @@ export default function PortalDetail() {
                   {getEmbedUrl(selectedRound.videoUrl)?.includes('youtube.com') || getEmbedUrl(selectedRound.videoUrl)?.includes('vimeo.com') ? (
                     <iframe 
                       src={getEmbedUrl(selectedRound.videoUrl)!}
-                      className="absolute inset-0 h-full w-full"
+                      className="w-full h-full border-0"
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                       allowFullScreen
                       title={selectedRound.title || 'Video preview'}
@@ -353,7 +353,7 @@ export default function PortalDetail() {
                       onLoadedMetadata={syncCurrentPlaybackTime}
                       onTimeUpdate={syncCurrentPlaybackTime}
                       onSeeked={syncCurrentPlaybackTime}
-                      className="absolute inset-0 h-full w-full object-contain"
+                      className="w-full h-full object-contain"
                     />
                   )}
                </div>
