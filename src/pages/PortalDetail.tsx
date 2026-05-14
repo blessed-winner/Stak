@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ChevronLeft, Plus, Play, Link2, Bell, Pencil, ChevronRight, MessageSquare, Download, CheckCircle, Share2, Globe, User, Menu, X, Clock } from 'lucide-react';
 import { Button } from '../components/ui/Button';
@@ -33,7 +33,9 @@ export default function PortalDetail() {
   const [hiddenNoteIds, setHiddenNoteIds] = useState<string[]>([]);
   const [currentPlaybackTime, setCurrentPlaybackTime] = useState<string>('--:--');
   const [selectedRoundDuration, setSelectedRoundDuration] = useState<string>('--:--');
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const videoRef = React.useRef<HTMLVideoElement>(null);
+  const notificationsPanelRef = useRef<HTMLDivElement>(null);
 
   const prevRoundsLength = React.useRef(rounds.length);
 
@@ -70,6 +72,19 @@ export default function PortalDetail() {
 
     fetchSelectedDuration();
   }, [selectedRound?.videoUrl]);
+
+  useEffect(() => {
+    const handleDocumentClick = (event: MouseEvent) => {
+      if (!isNotificationsOpen) return;
+      const target = event.target as Node;
+      if (notificationsPanelRef.current && !notificationsPanelRef.current.contains(target)) {
+        setIsNotificationsOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleDocumentClick);
+    return () => document.removeEventListener('mousedown', handleDocumentClick);
+  }, [isNotificationsOpen]);
 
   const formatPlaybackTime = (timeInSeconds: number) => {
     const safeSeconds = Number.isFinite(timeInSeconds) ? Math.max(timeInSeconds, 0) : 0;
@@ -216,10 +231,54 @@ export default function PortalDetail() {
           </button>
           <div className="w-px h-6 bg-border-default mx-2" />
           <div className="flex items-center gap-4">
-            <button className="p-2 hover:bg-surface-overlay rounded-full transition-stak relative">
-              <Bell size={20} className="text-text-secondary" />
-              <div className="absolute top-2 right-2 w-2 h-2 bg-[#FF4444] rounded-full border-2 border-surface-raised" />
-            </button>
+            <div ref={notificationsPanelRef} className="relative">
+              <button
+                type="button"
+                onClick={() => setIsNotificationsOpen((current) => !current)}
+                className="p-2 hover:bg-surface-overlay rounded-full transition-stak relative"
+              >
+                <Bell size={20} className="text-text-secondary" />
+                <div className="absolute top-2 right-2 w-2 h-2 bg-[#FF4444] rounded-full border-2 border-surface-raised" />
+              </button>
+
+              <AnimatePresence>
+                {isNotificationsOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -8, scale: 0.98 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -8, scale: 0.98 }}
+                    className="absolute right-0 top-full z-50 mt-3 w-[320px] overflow-hidden rounded-sm border border-border-default bg-surface-raised shadow-[0_24px_60px_rgba(0,0,0,0.18)]"
+                  >
+                    <div className="border-b border-border-default px-4 py-3">
+                      <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-text-tertiary">Notifications</p>
+                    </div>
+                    <div className="max-h-[320px] space-y-0 overflow-y-auto p-2">
+                      {activities.slice(0, 5).length > 0 ? activities.slice(0, 5).map((activity) => (
+                        <div
+                          key={activity.id}
+                          className="flex gap-3 rounded-sm px-3 py-3 hover:bg-surface-overlay transition-stak"
+                        >
+                          <div className="mt-1 h-2 w-2 rounded-full bg-brand-primary shrink-0" />
+                          <div className="min-w-0">
+                            <p className="text-sm leading-snug text-text-primary">
+                              <strong>{portal.clientName}</strong> {activity.eventType.replace('_', ' ')}
+                            </p>
+                            <p className="mt-1 text-[10px] uppercase tracking-[0.18em] text-text-secondary">
+                              {formatRelativeTime(activity.occurredAt)}
+                            </p>
+                          </div>
+                        </div>
+                      )) : (
+                        <div className="px-4 py-8 text-center">
+                          <p className="text-sm text-text-secondary">No notifications yet.</p>
+                        </div>
+                      )}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
             <div className="w-9 h-9 rounded-full bg-surface-overlay border border-border-default flex items-center justify-center text-text-tertiary">
               <User size={18} />
             </div>
