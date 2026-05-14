@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Search, Copy, ExternalLink, ChevronLeft, ChevronRight, User, MoreHorizontal, Archive, Trash2 } from 'lucide-react';
+import { Plus, Search, Copy, ExternalLink, ChevronLeft, ChevronRight, User, MoreHorizontal, Archive, Trash2, RotateCcw } from 'lucide-react';
 import { Sidebar } from '../components/layout/Sidebar';
 import { MobileNav } from '../components/layout/MobileNav';
 import { Button } from '../components/ui/Button';
 import { ROUTES } from '../constants';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn, formatDate, formatRelativeTime } from '../lib/utils';
-import { usePortals, archivePortal, deletePortal } from '../hooks/usePortals';
+import { usePortals, archivePortal, deletePortal, unarchivePortal } from '../hooks/usePortals';
 import { Portal } from '../types';
 import { useUIStore } from '../store/uiStore';
 import { useAuthStore } from '../store/authStore';
@@ -48,6 +48,17 @@ export default function Portals() {
       refreshPortals();
     } catch (error: any) {
       addToast(error.message || 'Failed to archive', 'error');
+    }
+    setActiveMenuId(null);
+  };
+
+  const handleUnarchive = async (id: string) => {
+    try {
+      await unarchivePortal(id);
+      addToast('Portal restored from archive', 'success');
+      refreshPortals();
+    } catch (error: any) {
+      addToast(error.message || 'Failed to unarchive', 'error');
     }
     setActiveMenuId(null);
   };
@@ -221,16 +232,29 @@ export default function Portals() {
                                 exit={{ opacity: 0, scale: 0.95, y: -10 }}
                                 className="absolute right-0 top-full mt-2 w-48 bg-white border border-black/5 rounded-sm shadow-xl z-20 overflow-hidden"
                               >
-                                <button 
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleArchive(portal.id);
-                                  }}
-                                  className="w-full flex items-center gap-3 px-4 py-3 text-sm text-[#444] hover:bg-black/[0.02] transition-stak text-left"
-                                >
-                                  <Archive size={14} />
-                                  Archive
-                                </button>
+                                {portal.status === 'archived' ? (
+                                  <button 
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleUnarchive(portal.id);
+                                    }}
+                                    className="w-full flex items-center gap-3 px-4 py-3 text-sm text-[#444] hover:bg-black/[0.02] transition-stak text-left"
+                                  >
+                                    <RotateCcw size={14} />
+                                    Unarchive
+                                  </button>
+                                ) : (
+                                  <button 
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleArchive(portal.id);
+                                    }}
+                                    className="w-full flex items-center gap-3 px-4 py-3 text-sm text-[#444] hover:bg-black/[0.02] transition-stak text-left"
+                                  >
+                                    <Archive size={14} />
+                                    Archive
+                                  </button>
+                                )}
                                 <button 
                                   onClick={(e) => {
                                     e.stopPropagation();

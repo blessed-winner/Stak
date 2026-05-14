@@ -220,6 +220,15 @@ export async function deletePortal(portalId: string) {
   if (error) throw error;
 }
 
+export async function unarchivePortal(portalId: string) {
+  const { error } = await supabase
+    .from('portals')
+    .update({ status: 'active' })
+    .eq('id', portalId);
+  
+  if (error) throw error;
+}
+
 export async function archivePortal(portalId: string) {
   const { error } = await supabase
     .from('portals')
