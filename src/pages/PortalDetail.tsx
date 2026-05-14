@@ -273,7 +273,7 @@ export default function PortalDetail() {
       {/* Main Content */}
       <div className="flex flex-col lg:grid lg:grid-cols-[360px_1fr_360px] min-h-[calc(100vh-80px)] pb-24 lg:pb-0">
         {/* Left Column: Rounds */}
-        <aside className="border-b lg:border-b-0 lg:border-r border-border-default p-6 md:p-10 bg-surface-overlay lg:bg-surface-overlay">
+        <aside className="border-b lg:border-b-0 lg:border-r border-border-default p-6 md:p-10 bg-surface-raised lg:bg-surface-raised">
           <div className="flex items-center justify-between mb-8">
             <h3 className="text-sm font-bold uppercase tracking-[0.1em]">Rounds</h3>
             <span className="text-[11px] text-[#999] font-bold uppercase tracking-widest">{rounds.length} Total</span>
@@ -319,7 +319,7 @@ export default function PortalDetail() {
         </aside>
 
         {/* Middle Column: Revision Notes */}
-        <main className="p-6 md:p-10 border-b lg:border-b-0 lg:border-r border-border-default flex-1 bg-[#050608]">
+        <main className="p-6 md:p-10 border-b lg:border-b-0 lg:border-r border-border-default flex-1 bg-surface-base">
           <div className="flex items-center justify-between mb-10">
             <h3 className="text-sm font-bold uppercase tracking-[0.1em]">Revision Notes</h3>
             {selectedRound && (
@@ -336,7 +336,7 @@ export default function PortalDetail() {
 
           {selectedRound && (
             <div className="mb-12">
-               <div className="bg-[#050608] aspect-video rounded-sm overflow-hidden shadow-sm relative group">
+               <div className="bg-black aspect-video rounded-sm overflow-hidden shadow-sm relative group">
                   {getEmbedUrl(selectedRound.videoUrl)?.includes('youtube.com') || getEmbedUrl(selectedRound.videoUrl)?.includes('vimeo.com') ? (
                     <iframe 
                       src={getEmbedUrl(selectedRound.videoUrl)!}
@@ -449,7 +449,7 @@ export default function PortalDetail() {
         </main>
 
         {/* Right Column: Sidebar Panels */}
-        <aside className="p-6 md:p-10 bg-[#12151a]">
+        <aside className="p-6 md:p-10 bg-surface-raised">
           <div className="space-y-12">
             {/* Client Section */}
             <section>
