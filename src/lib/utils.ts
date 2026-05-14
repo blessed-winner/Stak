@@ -36,15 +36,41 @@ export function formatRelativeTime(date: string | Date | any) {
 
 export function getEmbedUrl(url: string) {
   if (!url) return null;
-  
-  // YouTube
-  const ytMatch = url.match(/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/);
+
+  try {
+    const parsedUrl = new URL(url);
+
+    // YouTube
+    if (parsedUrl.hostname.includes('youtube.com') || parsedUrl.hostname.includes('youtu.be')) {
+      const videoId =
+        parsedUrl.hostname.includes('youtu.be')
+          ? parsedUrl.pathname.replace('/', '')
+          : parsedUrl.pathname.includes('/shorts/')
+            ? parsedUrl.pathname.split('/shorts/')[1]?.split('/')[0]
+            : parsedUrl.searchParams.get('v') || parsedUrl.pathname.split('/embed/')[1]?.split('/')[0];
+
+      if (videoId) return `https://www.youtube.com/embed/${videoId}`;
+    }
+
+    // Vimeo
+    if (parsedUrl.hostname.includes('vimeo.com')) {
+      const vimeoId = parsedUrl.pathname.split('/').filter(Boolean).pop();
+      if (vimeoId && /^\d+$/.test(vimeoId)) {
+        return `https://player.vimeo.com/video/${vimeoId}`;
+      }
+    }
+  } catch {
+    // Fall back to regex parsing for malformed input.
+  }
+
+  // YouTube fallback
+  const ytMatch = url.match(/(?:youtube\.com\/watch.*[?&]v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]{11})/);
   if (ytMatch) return `https://www.youtube.com/embed/${ytMatch[1]}`;
-  
-  // Vimeo
-  const vimeoMatch = url.match(/(?:https?:\/\/)?(?:www\.)?(?:vimeo\.com\/|player\.vimeo\.com\/video\/)(\d+)/);
+
+  // Vimeo fallback
+  const vimeoMatch = url.match(/(?:vimeo\.com\/|player\.vimeo\.com\/video\/)(\d+)/);
   if (vimeoMatch) return `https://player.vimeo.com/video/${vimeoMatch[1]}`;
-  
+
   return url;
 }
 
