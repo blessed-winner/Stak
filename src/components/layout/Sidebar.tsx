@@ -84,8 +84,12 @@ export function Sidebar() {
           <div className="space-y-4">
             <div className="pt-6 border-t border-border-default flex items-center justify-between gap-3 px-2">
               <div className="flex items-center gap-3 overflow-hidden">
-                <div className="w-8 h-8 rounded-full bg-surface-overlay shrink-0 border border-border-default flex items-center justify-center text-text-tertiary">
-                  <User size={16} />
+                <div className="w-8 h-8 rounded-full bg-surface-overlay shrink-0 border border-border-default flex items-center justify-center text-text-tertiary overflow-hidden">
+                  {profile?.avatarUrl ? (
+                    <img src={profile.avatarUrl} alt="Profile" className="w-full h-full object-cover" />
+                  ) : (
+                    <User size={16} />
+                  )}
                 </div>
                 <div className="overflow-hidden">
                   <p className="text-xs font-semibold text-text-primary truncate">{profile?.displayName || 'Editor Name'}</p>

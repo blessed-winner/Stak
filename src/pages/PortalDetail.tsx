@@ -290,10 +290,14 @@ export default function PortalDetail() {
             <button
               type="button"
               onClick={() => navigate(ROUTES.SETTINGS)}
-              className="flex h-9 w-9 items-center justify-center rounded-full border border-border-default bg-surface-overlay text-text-tertiary transition-stak hover:bg-surface-hover hover:text-text-primary"
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-border-default bg-surface-overlay text-text-tertiary transition-stak hover:bg-surface-hover hover:text-text-primary overflow-hidden"
               aria-label="Open settings"
             >
-              <User size={18} />
+              {profile?.avatarUrl ? (
+                <img src={profile.avatarUrl} alt="Profile" className="w-full h-full object-cover" />
+              ) : (
+                <User size={18} />
+              )}
             </button>
           </div>
         </div>

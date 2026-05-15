@@ -12,6 +12,7 @@ declare global {
   interface Window {
     YT?: any;
     Vimeo?: any;
+    onYouTubeIframeAPIReady?: () => void;
   }
 }
 
@@ -47,9 +48,23 @@ function loadScriptOnce(src: string, id: string) {
 
 function ensureYouTubeApi() {
   if (!youtubeApiPromise) {
-    youtubeApiPromise = loadScriptOnce('https://www.youtube.com/iframe_api', 'youtube-iframe-api');
+    youtubeApiPromise = new Promise<void>((resolve) => {
+      // API already loaded and ready — resolve immediately.
+      if (window.YT?.Player) {
+        resolve();
+        return;
+      }
+      // YouTube fires window.onYouTubeIframeAPIReady AFTER the script loads
+      // and the Player constructor is available. Simply waiting for script
+      // onload is too early — window.YT.Player is still undefined at that point.
+      const prevReady = window.onYouTubeIframeAPIReady;
+      window.onYouTubeIframeAPIReady = () => {
+        if (prevReady) prevReady();
+        resolve();
+      };
+      loadScriptOnce('https://www.youtube.com/iframe_api', 'youtube-iframe-api').catch(console.error);
+    });
   }
-
   return youtubeApiPromise;
 }
 
