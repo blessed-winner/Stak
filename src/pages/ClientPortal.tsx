@@ -6,7 +6,7 @@ import { ArrowRight, CheckCircle2, Clock, Play, User } from 'lucide-react';
 import { getClientPortal, useClientNotes, useClientRounds, submitRevision } from '../hooks/useClientPortal';
 import { approvePortal } from '../hooks/usePortal';
 import { Portal } from '../types';
-import { getVideoDuration } from '../lib/utils';
+import { getVideoDuration, getProvider } from '../lib/utils';
 
 declare global {
   interface Window {
@@ -473,15 +473,20 @@ export default function ClientPortal() {
                 title={currentRound?.title || 'Video preview'}
               />
             ) : currentRound?.videoUrl ? (
-              <video
-                ref={videoRef}
-                onTimeUpdate={handleTimeUpdate}
-                onLoadedMetadata={handleTimeUpdate}
-                onSeeked={handleTimeUpdate}
-                src={currentRound.videoUrl}
-                controls
-                className="aspect-video w-full object-contain"
-              />
+              <div className="flex aspect-video w-full flex-col items-center justify-center gap-6 bg-[#111] border-b border-black/10">
+                <div className="flex flex-col items-center gap-3 opacity-50">
+                  <Play size={42} strokeWidth={1.4} className="text-white" />
+                  <span className="font-serif text-xl text-white">External Delivery</span>
+                </div>
+                <a
+                  href={currentRound.videoUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex items-center gap-2 rounded-sm bg-white px-8 py-3 text-xs font-semibold text-black transition-opacity hover:opacity-90"
+                >
+                  Watch Cut <ArrowRight size={14} />
+                </a>
+              </div>
             ) : (
               <div className="flex aspect-video w-full items-center justify-center text-white/10">
                 <div className="flex flex-col items-center gap-3">

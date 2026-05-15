@@ -33,7 +33,6 @@ export async function getClientPortal(editorSlug: string, portalSlug: string) {
       clientName: portal.client_name,
       clientEmail: portal.client_email,
       status: portal.status,
-      paymentLink: portal.payment_link,
       accentColor: portal.accent_color,
       watermark: portal.watermark,
       createdAt: portal.created_at,

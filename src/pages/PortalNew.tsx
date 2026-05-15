@@ -19,7 +19,6 @@ export default function PortalNew() {
     clientEmail: '',
     videoUrl: '',
     roundLabel: 'Round 1',
-    paymentLink: '',
   });
 
   const navigate = useNavigate();
@@ -34,7 +33,6 @@ export default function PortalNew() {
         title: formData.projectTitle,
         clientName: formData.clientName,
         clientEmail: formData.clientEmail,
-        paymentLink: formData.paymentLink,
         slug: slug,
       }, {
         videoUrl: formData.videoUrl,
@@ -167,12 +165,6 @@ export default function PortalNew() {
                     placeholder="e.g. Round 1 — Initial Edit"
                     value={formData.roundLabel}
                     onChange={(e) => setFormData({ ...formData, roundLabel: e.target.value })}
-                  />
-                  <Input 
-                    label="Payment Link (Optional)"
-                    placeholder="Stripe, LemonSqueezy, or PayPal link"
-                    value={formData.paymentLink}
-                    onChange={(e) => setFormData({ ...formData, paymentLink: e.target.value })}
                   />
                 </div>
 

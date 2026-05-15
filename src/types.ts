@@ -22,7 +22,6 @@ export interface Portal {
   clientEmail?: string;
   lastReminderSentAt?: any;
   status: PortalStatus;
-  paymentLink?: string;
   accentColor: string;
   watermark: boolean;
   createdAt: any;
@@ -51,7 +50,7 @@ export interface RevisionNote {
   submittedAt: any;
 }
 
-export type EventType = 'portal_viewed' | 'round_viewed' | 'notes_submitted' | 'approved' | 'paid' | 'reminder_sent';
+export type EventType = 'portal_viewed' | 'round_viewed' | 'notes_submitted' | 'approved' | 'reminder_sent';
 
 export interface Activity {
   id: string;

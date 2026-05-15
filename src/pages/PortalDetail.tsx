@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ChevronLeft, Plus, Play, Link2, Bell, Pencil, ChevronRight, MessageSquare, Download, CheckCircle, Share2, Globe, User, Menu, X, Clock } from 'lucide-react';
+import { ChevronLeft, Plus, Play, Link2, Bell, Pencil, ChevronRight, MessageSquare, Download, CheckCircle, Share2, Globe, User, Menu, X, Clock, ArrowRight } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { CopyButton } from '../components/ui/CopyButton';
 import { MobileNav } from '../components/layout/MobileNav';
 import { ClientEmailField } from '../components/portal/ClientEmailField';
 import { ROUTES } from '../constants';
-import { cn, formatDate, getVideoDuration, getEmbedUrl, formatRelativeTime } from '../lib/utils';
+import { cn, formatDate, formatRelativeTime, getEmbedUrl, getProvider, getVideoDuration } from '../lib/utils';
 import { useAuthStore } from '../store/authStore';
 import { usePortal, deleteNote } from '../hooks/usePortal';
 import { useUIStore } from '../store/uiStore';
@@ -412,15 +412,30 @@ export default function PortalDetail() {
 
           {selectedRound && (
             <div className="mb-12">
-               <div className="bg-black aspect-video rounded-sm overflow-hidden shadow-sm relative group">
-                  {getEmbedUrl(selectedRound.videoUrl)?.includes('youtube.com') || getEmbedUrl(selectedRound.videoUrl)?.includes('vimeo.com') ? (
+                <div className="bg-black aspect-video rounded-sm overflow-hidden shadow-sm relative group">
+                  {getProvider(selectedRound.videoUrl) === 'youtube' || getProvider(selectedRound.videoUrl) === 'vimeo' ? (
                     <iframe 
-                      src={getEmbedUrl(selectedRound.videoUrl)!}
+                      src={getEmbedUrl(selectedRound.videoUrl!)!}
                       className="w-full h-full border-0"
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                       allowFullScreen
                       title={selectedRound.title || 'Video preview'}
                     />
+                  ) : getProvider(selectedRound.videoUrl) === 'external' ? (
+                    <div className="w-full h-full flex flex-col items-center justify-center bg-surface-overlay border border-border-default gap-6">
+                      <div className="flex flex-col items-center gap-3 opacity-40">
+                         <Play size={42} strokeWidth={1.4} />
+                         <span className="font-serif text-xl">External Delivery</span>
+                      </div>
+                      <a 
+                        href={selectedRound.videoUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="bg-brand-primary text-text-inverse px-8 py-3 text-xs font-semibold rounded-sm hover:opacity-90 transition-stak flex items-center gap-2"
+                      >
+                        Watch Cut <ArrowRight size={14} />
+                      </a>
+                    </div>
                   ) : (
                     <video 
                       ref={videoRef}
@@ -432,7 +447,7 @@ export default function PortalDetail() {
                       className="w-full h-full object-contain"
                     />
                   )}
-               </div>
+                </div>
                <div className="mt-3 flex items-center justify-between text-[10px] font-bold uppercase tracking-widest text-text-tertiary">
                  <span>Current time</span>
                  <span>{currentPlaybackTime === '--:--' ? 'Time unavailable' : currentPlaybackTime}</span>
@@ -547,14 +562,7 @@ export default function PortalDetail() {
               </div>
             </section>
 
-            {/* Payment Section */}
-            <section>
-              <h3 className="text-[11px] font-bold uppercase tracking-widest text-text-tertiary mb-6">Payment</h3>
-              <button className="w-full py-6 border border-dashed border-border-default rounded-sm text-text-secondary text-sm font-semibold flex items-center justify-center gap-2 hover:border-border-strong hover:text-text-primary transition-stak group">
-                <Plus size={18} className="text-text-secondary group-hover:text-text-primary transition-stak" />
-                Add Payment Link
-              </button>
-            </section>
+
 
             {/* Portal Link Section */}
             <section>

@@ -34,6 +34,24 @@ export function formatRelativeTime(date: string | Date | any) {
   return formatDate(date);
 }
 
+export type VideoProvider = 'youtube' | 'vimeo' | 'external';
+
+export function getProvider(url: string | null | undefined): VideoProvider {
+  if (!url) return 'external';
+  
+  try {
+    const parsed = new URL(url);
+    if (parsed.hostname.includes('youtube.com') || parsed.hostname.includes('youtu.be')) return 'youtube';
+    if (parsed.hostname.includes('vimeo.com')) return 'vimeo';
+  } catch {
+    // Fallback regex check if URL parsing fails
+    if (url.match(/(?:youtube\.com|youtu\.be)/)) return 'youtube';
+    if (url.match(/vimeo\.com/)) return 'vimeo';
+  }
+  
+  return 'external';
+}
+
 export function getEmbedUrl(url: string) {
   if (!url) return null;
 
@@ -71,7 +89,7 @@ export function getEmbedUrl(url: string) {
   const vimeoMatch = url.match(/(?:vimeo\.com\/|player\.vimeo\.com\/video\/)(\d+)/);
   if (vimeoMatch) return `https://player.vimeo.com/video/${vimeoMatch[1]}`;
 
-  return url;
+  return null;
 }
 
 export function getVideoThumbnail(url: string): string {
@@ -108,20 +126,10 @@ export async function getVideoDuration(url: string): Promise<string> {
         return `${mins}:${secs.toString().padStart(2, '0')}`;
       }
     } else {
-      return await new Promise((resolve) => {
-        const video = document.createElement('video');
-        video.preload = 'metadata';
-        video.src = url;
-        video.onloadedmetadata = () => {
-          const totalSeconds = Number.isFinite(video.duration) ? video.duration : 0;
-          resolve(formatPlaybackSeconds(totalSeconds));
-          video.remove();
-        };
-        video.onerror = () => {
-          resolve('--:--');
-          video.remove();
-        };
-      });
+      // For external links, we can't reliably get duration without loading the whole thing (if it's a direct file)
+      // or we can't get it at all if it's a preview page (Loom, Drive).
+      // We'll return '--:--' and let the user see it on the destination page.
+      return '--:--';
     }
   } catch (e) {
     console.error('Error fetching duration:', e);

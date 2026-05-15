@@ -37,7 +37,6 @@ export function usePortal(portalId: string) {
         clientEmail: portalData.client_email,
         lastReminderSentAt: portalData.last_reminder_sent_at,
         status: portalData.status,
-        paymentLink: portalData.payment_link,
         accentColor: portalData.accent_color,
         watermark: portalData.watermark,
         createdAt: portalData.created_at,
