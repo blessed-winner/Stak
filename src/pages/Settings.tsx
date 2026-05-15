@@ -18,7 +18,7 @@ const NOTIFICATION_KEYS = [
 type NotificationKey = (typeof NOTIFICATION_KEYS)[number];
 
 export default function Settings() {
-  const { profile, signOut, setProfile } = useAuthStore();
+  const { profile, signOut, setProfile, deactivateAccount } = useAuthStore();
   const { stats } = useDashboard();
   const { theme, setTheme } = useThemeStore();
   const { addToast } = useUIStore();
@@ -27,6 +27,8 @@ export default function Settings() {
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [isDeactivateOpen, setIsDeactivateOpen] = useState(false);
+  const [isDeactivating, setIsDeactivating] = useState(false);
   const [formData, setFormData] = useState({
     fullName: '',
     displayName: '',
@@ -393,9 +395,7 @@ export default function Settings() {
               <div className="pt-2 text-center">
                 <button
                   type="button"
-                  onClick={async () => {
-                    await signOut();
-                  }}
+                  onClick={() => setIsDeactivateOpen(true)}
                   className="text-sm font-medium text-[#d06a6a] transition-colors hover:text-[#b95555]"
                 >
                   Deactivate account
@@ -405,6 +405,63 @@ export default function Settings() {
           </div>
       </main>
       <MobileNav />
+
+      {/* Deactivation confirmation dialog */}
+      {isDeactivateOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          {/* Backdrop */}
+          <button
+            type="button"
+            onClick={() => setIsDeactivateOpen(false)}
+            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+            aria-label="Close dialog"
+          />
+
+          <div className="relative w-full max-w-md overflow-hidden border border-black/10 bg-[#faf8f4] shadow-[0_30px_80px_rgba(0,0,0,0.18)]">
+            <div className="border-b border-black/5 px-6 py-5">
+              <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-black/35">Danger zone</p>
+              <h3 className="mt-2 text-2xl font-serif text-black">Deactivate your account?</h3>
+            </div>
+
+            <div className="px-6 py-5 space-y-4">
+              <p className="text-sm leading-relaxed text-black/65">
+                Your account will be <strong>scheduled for permanent deletion in 30 days</strong>. During this period your portals will be inaccessible and you will be signed out immediately.
+              </p>
+              <div className="rounded-sm border border-[#f5c6c6] bg-[#fff5f5] p-4 text-sm text-[#b91c1c]">
+                <p className="font-semibold mb-1">This cannot be undone after 30 days.</p>
+                <p className="text-[13px] leading-relaxed opacity-80">All portals, rounds, revision notes, and client activity will be permanently erased. You will not be able to recover any data.</p>
+              </div>
+
+              <div className="flex flex-col gap-3 sm:flex-row pt-2">
+                <button
+                  type="button"
+                  onClick={() => setIsDeactivateOpen(false)}
+                  disabled={isDeactivating}
+                  className="flex-1 rounded-sm border border-black/10 bg-white px-5 py-3 text-sm font-medium text-black transition-colors hover:bg-black/5 disabled:opacity-40"
+                >
+                  Cancel, keep my account
+                </button>
+                <button
+                  type="button"
+                  disabled={isDeactivating}
+                  onClick={async () => {
+                    setIsDeactivating(true);
+                    try {
+                      await deactivateAccount();
+                    } catch {
+                      addToast('Failed to deactivate account. Please try again.', 'error');
+                      setIsDeactivating(false);
+                    }
+                  }}
+                  className="flex-1 rounded-sm bg-[#b91c1c] px-5 py-3 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+                >
+                  {isDeactivating ? 'Deactivating...' : 'Yes, deactivate my account'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

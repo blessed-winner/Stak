@@ -14,6 +14,7 @@ interface AuthState {
   setLoading: (loading: boolean) => void;
   setInitialized: (val: boolean) => void;
   signOut: () => Promise<void>;
+  deactivateAccount: () => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -34,7 +35,30 @@ export const useAuthStore = create<AuthState>((set) => ({
       console.error("Sign out error:", err);
     } finally {
       set({ user: null, profile: null, loading: false });
-      // Clear any potential session data from localStorage as a fallback
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('supabase.auth.token');
+      }
+    }
+  },
+  deactivateAccount: async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user && isSupabaseConfigured) {
+        const deletionDate = new Date();
+        deletionDate.setDate(deletionDate.getDate() + 30);
+        await supabase
+          .from('profiles')
+          .update({ scheduled_deletion_at: deletionDate.toISOString() })
+          .eq('id', user.id);
+      }
+    } catch (err) {
+      console.error('Deactivation error:', err);
+    } finally {
+      // Always sign out regardless of DB success
+      try {
+        if (isSupabaseConfigured) await supabase.auth.signOut();
+      } catch { /* ignore */ }
+      set({ user: null, profile: null, loading: false });
       if (typeof window !== 'undefined') {
         localStorage.removeItem('supabase.auth.token');
       }
