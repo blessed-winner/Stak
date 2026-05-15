@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowRight, BookOpen, ChevronDown, ChevronUp, ExternalLink, MessageSquare, PlayCircle, Search, Upload } from 'lucide-react';
+import { BookOpen, ChevronDown, ChevronUp, ExternalLink, MessageSquare, Search, Upload } from 'lucide-react';
 import { Sidebar } from '../components/layout/Sidebar';
 import { MobileNav } from '../components/layout/MobileNav';
 import { cn } from '../lib/utils';
@@ -16,11 +16,6 @@ const helpCards = [
     icon: BookOpen,
     title: 'Help articles',
     description: 'Browse the guides for portals, review rounds, settings, and account setup.',
-  },
-  {
-    icon: PlayCircle,
-    title: 'Video tutorials',
-    description: 'See short walkthroughs for creating portals, sharing reviews, and managing feedback.',
   },
   {
     icon: MessageSquare,
@@ -92,16 +87,7 @@ const faqGroups = [
   },
 ];
 
-const tutorialCards = [
-  {
-    title: 'Workflow Masterclass',
-    description: 'Optimizing your STAK portal flow from upload to approval.',
-  },
-  {
-    title: 'Custom Branding',
-    description: 'Personalizing your editor workspace and client portal experience.',
-  },
-];
+
 
 const supportLinks = [
   'Community Forum',
@@ -134,7 +120,7 @@ export default function Support() {
                 <Search size={18} className="text-text-tertiary" />
                 <input
                   type="text"
-                  placeholder="Search for documentation, guides, or tutorials..."
+                  placeholder="Search for documentation or guides..."
                   className="w-full bg-transparent text-sm outline-none placeholder:text-text-tertiary"
                 />
                 <kbd className="rounded-sm border border-border-default bg-surface-overlay px-2 py-1 text-[10px] text-text-tertiary">⌘K</kbd>
@@ -202,31 +188,7 @@ export default function Support() {
               </div>
             </section>
 
-            <section className="pt-4">
-              <div className="mb-4 flex items-center justify-between">
-                <h2 className="text-xs font-semibold uppercase tracking-[0.32em] text-text-tertiary">Latest Video Tutorials</h2>
-                <button type="button" className="inline-flex items-center gap-2 text-xs font-medium uppercase tracking-[0.22em] text-text-secondary transition-stak hover:text-text-primary">
-                  View all <ArrowRight size={14} />
-                </button>
-              </div>
 
-              <div className="grid gap-4 md:grid-cols-2">
-                {tutorialCards.map((card, index) => (
-                  <article key={card.title} className="overflow-hidden rounded-sm border border-border-default bg-surface-raised shadow-[0_12px_30px_rgba(0,0,0,0.04)]">
-                    <div className={cn('relative aspect-[16/10]', index === 0 ? 'bg-[linear-gradient(135deg,#1c2333_0%,#0f1116_50%,#2d3650_100%)]' : 'bg-[linear-gradient(135deg,#0d1118_0%,#1c1c22_40%,#d7d0c5_100%)]')}>
-                      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(200,255,0,0.18),transparent_25%),radial-gradient(circle_at_bottom_right,rgba(255,255,255,0.14),transparent_30%)]" />
-                      <div className="absolute bottom-3 right-3 rounded-sm bg-black/80 px-2 py-1 text-[10px] font-medium text-white">
-                        {index === 0 ? '04:12' : '08:48'}
-                      </div>
-                    </div>
-                    <div className="p-4">
-                      <h3 className="text-sm font-medium">{card.title}</h3>
-                      <p className="mt-1 text-sm text-text-secondary">{card.description}</p>
-                    </div>
-                  </article>
-                ))}
-              </div>
-            </section>
 
             <section className="grid gap-4 pt-4 lg:grid-cols-[1fr_280px]">
               <div className="rounded-sm border border-border-default bg-surface-raised p-5 shadow-[0_12px_30px_rgba(0,0,0,0.04)] md:p-6">
