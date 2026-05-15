@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { cn, formatDate, getEmbedUrl } from '../lib/utils';
+import { cn, formatDate } from '../lib/utils';
 import { ArrowRight, CheckCircle2, Clock, Play, User } from 'lucide-react';
 import { getClientPortal, useClientNotes, useClientRounds, submitRevision } from '../hooks/useClientPortal';
 import { approvePortal } from '../hooks/usePortal';
@@ -85,7 +85,6 @@ export default function ClientPortal() {
   const [duration, setDuration] = useState('--:--');
   const [videoProgress, setVideoProgress] = useState(0);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const visibleIframeRef = useRef<HTMLIFrameElement>(null);
   const playerContainerRef = useRef<HTMLDivElement>(null);
   const youtubePlayerRef = useRef<any>(null);
   const vimeoPlayerRef = useRef<any>(null);
@@ -99,22 +98,6 @@ export default function ClientPortal() {
   const visibleNotes = currentNotes.slice(0, 3);
   const videoProvider = getVideoProvider(currentRound?.videoUrl);
   const youtubeVideoId = extractYouTubeVideoId(currentRound?.videoUrl);
-  const embedUrl = currentRound?.videoUrl ? getEmbedUrl(currentRound.videoUrl) : null;
-  const playableEmbedUrl = embedUrl && videoProvider === 'youtube'
-    ? (() => {
-        const url = new URL(embedUrl);
-        url.searchParams.set('enablejsapi', '1');
-        url.searchParams.set('origin', window.location.origin);
-        url.searchParams.set('rel', '0');
-        return url.toString();
-      })()
-    : embedUrl && videoProvider === 'vimeo'
-      ? (() => {
-          const url = new URL(embedUrl);
-          url.searchParams.set('api', '1');
-          return url.toString();
-        })()
-      : embedUrl;
 
   const formatPlaybackTime = (seconds: number) => {
     const safeSeconds = Number.isFinite(seconds) && seconds >= 0 ? seconds : 0;
@@ -454,20 +437,13 @@ export default function ClientPortal() {
         <section className="overflow-hidden border border-black/10 bg-white shadow-[0_12px_36px_rgba(0,0,0,0.10)]">
           <div className="relative bg-black">
             {videoProvider === 'youtube' || videoProvider === 'vimeo' ? (
-              <>
-                <iframe
-                  ref={visibleIframeRef}
-                  src={playableEmbedUrl || undefined}
-                  className="aspect-video w-full"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                  title={currentRound?.title || 'Video preview'}
-                />
-                <div
-                  ref={playerContainerRef}
-                  className="absolute left-[-9999px] top-0 h-[1px] w-[1px] overflow-hidden opacity-0 pointer-events-none"
-                />
-              </>
+              // Single player container: YT.Player / Vimeo.Player renders their
+              // iframe inside this div, so the user interacts with the SAME
+              // instance we poll for timestamps — fixing the stale-timestamp bug.
+              <div
+                ref={playerContainerRef}
+                className="aspect-video w-full"
+              />
             ) : currentRound?.videoUrl ? (
               <video
                 ref={videoRef}

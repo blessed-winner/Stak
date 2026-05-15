@@ -208,14 +208,12 @@ export async function archivePortal(portalId: string) {
 }
 
 export async function deleteNote(noteId: string) {
-  const { data, error } = await supabase
+  const { error } = await supabase
     .from('revision_notes')
     .delete()
-    .select('id')
     .eq('id', noteId);
   
   if (error) throw error;
-  if (!data || data.length === 0) {
-    throw new Error('No note was deleted');
-  }
+  // Note: Supabase RLS may prevent RETURNING rows even on a successful delete,
+  // so we do not check data.length here.
 }

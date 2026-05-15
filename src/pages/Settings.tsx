@@ -7,6 +7,7 @@ import { Sidebar } from '../components/layout/Sidebar';
 import { cn, slugify } from '../lib/utils';
 import { supabase } from '../lib/supabase';
 import { useThemeStore } from '../store/themeStore';
+import { useUIStore } from '../store/uiStore';
 
 const NOTIFICATION_KEYS = [
   'portalViewed',
@@ -20,6 +21,7 @@ export default function Settings() {
   const { profile, signOut, setProfile } = useAuthStore();
   const { stats } = useDashboard();
   const { theme, setTheme } = useThemeStore();
+  const { addToast } = useUIStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [saving, setSaving] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
@@ -161,13 +163,15 @@ export default function Settings() {
       setAvatarPreview(null);
 
       if (avatarUploadWarning) {
-        alert('Profile changes saved. Avatar upload was skipped because the storage bucket is missing.');
+        addToast('Profile saved. Avatar skipped — create an "avatars" public bucket in your Supabase Storage dashboard.', 'error');
       } else if (avatarColumnMissing) {
-        alert('Profile changes saved, but your database is missing the avatar_url column. Add it to store uploaded avatars.');
+        addToast('Profile saved, but the avatar_url column is missing from your profiles table.', 'error');
+      } else {
+        addToast('Profile saved successfully.', 'success');
       }
     } catch (error: any) {
       console.error(error);
-      alert(error.message || 'Failed to save profile');
+      addToast(error.message || 'Failed to save profile', 'error');
     } finally {
       setUploadingAvatar(false);
       setSaving(false);
