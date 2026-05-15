@@ -265,7 +265,7 @@ export default function ClientPortal() {
 
         vimeoPlayerRef.current = new window.Vimeo.Player(playerContainerRef.current, {
           url: currentRound.videoUrl,
-          responsive: true,
+          // aspect-ratio handled by the padding-bottom container above
         });
         vimeoPlayerRef.current.on('loaded', async () => {
           try {
@@ -452,13 +452,11 @@ export default function ClientPortal() {
         <section className="overflow-hidden border border-black/10 bg-white shadow-[0_12px_36px_rgba(0,0,0,0.10)]">
           <div className="relative bg-black">
             {videoProvider === 'youtube' || videoProvider === 'vimeo' ? (
-              // Single player container: YT.Player / Vimeo.Player renders their
-              // iframe inside this div, so the user interacts with the SAME
-              // instance we poll for timestamps — fixing the stale-timestamp bug.
-              <div
-                ref={playerContainerRef}
-                className="aspect-video w-full"
-              />
+              // padding-bottom technique gives a deterministic height before the
+              // SDK mounts its iframe, avoiding the zero-height race on first paint.
+              <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
+                <div ref={playerContainerRef} className="absolute inset-0" />
+              </div>
             ) : currentRound?.videoUrl ? (
               <video
                 ref={videoRef}
