@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { cn, formatDate } from '../lib/utils';
+import { cn, formatDate, getEmbedUrl } from '../lib/utils';
 import { ArrowRight, CheckCircle2, Clock, Play, User } from 'lucide-react';
 import { getClientPortal, useClientNotes, useClientRounds, submitRevision } from '../hooks/useClientPortal';
 import { approvePortal } from '../hooks/usePortal';
@@ -100,6 +100,7 @@ export default function ClientPortal() {
   const [duration, setDuration] = useState('--:--');
   const [videoProgress, setVideoProgress] = useState(0);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const visibleIframeRef = useRef<HTMLIFrameElement>(null);
   const playerContainerRef = useRef<HTMLDivElement>(null);
   const youtubePlayerRef = useRef<any>(null);
   const vimeoPlayerRef = useRef<any>(null);
@@ -113,6 +114,23 @@ export default function ClientPortal() {
   const visibleNotes = currentNotes.slice(0, 3);
   const videoProvider = getVideoProvider(currentRound?.videoUrl);
   const youtubeVideoId = extractYouTubeVideoId(currentRound?.videoUrl);
+  // Build embed URLs with JS API flags so the SDK can attach to the iframe
+  const embedUrl = currentRound?.videoUrl ? getEmbedUrl(currentRound.videoUrl) : null;
+  const playableEmbedUrl = embedUrl && videoProvider === 'youtube'
+    ? (() => {
+        const url = new URL(embedUrl);
+        url.searchParams.set('enablejsapi', '1');
+        url.searchParams.set('origin', window.location.origin);
+        url.searchParams.set('rel', '0');
+        return url.toString();
+      })()
+    : embedUrl && videoProvider === 'vimeo'
+      ? (() => {
+          const url = new URL(embedUrl);
+          url.searchParams.set('api', '1');
+          return url.toString();
+        })()
+      : embedUrl;
 
   const formatPlaybackTime = (seconds: number) => {
     const safeSeconds = Number.isFinite(seconds) && seconds >= 0 ? seconds : 0;
@@ -228,22 +246,18 @@ export default function ClientPortal() {
     let isCancelled = false;
 
     async function bindEmbeddedPlayer() {
-      if (!currentRound?.videoUrl || !playerContainerRef.current) return;
+      // The iframe is already visible and playing via its src URL.
+      // We attach the SDK to that SAME iframe for timestamp tracking only.
+      // If the SDK fails to load, video still plays — timestamps just won't work.
+      if (!currentRound?.videoUrl || !visibleIframeRef.current) return;
 
       if (videoProvider === 'youtube') {
         if (!youtubeVideoId) return;
         await ensureYouTubeApi();
-        if (isCancelled || !window.YT?.Player || !playerContainerRef.current) return;
+        if (isCancelled || !window.YT?.Player || !visibleIframeRef.current) return;
 
-        youtubePlayerRef.current = new window.YT.Player(playerContainerRef.current, {
-          videoId: youtubeVideoId,
-          width: '100%',
-          height: '100%',
-          playerVars: {
-            origin: window.location.origin,
-            rel: 0,
-            modestbranding: 1,
-          },
+        // Attach to the EXISTING iframe — no videoId needed, video is already loaded.
+        youtubePlayerRef.current = new window.YT.Player(visibleIframeRef.current, {
           events: {
             onReady: (event: any) => {
               const currentTime = event.target.getCurrentTime?.();
@@ -252,21 +266,17 @@ export default function ClientPortal() {
               if (typeof totalDuration === 'number' && totalDuration > 0) setDuration(formatPlaybackTime(totalDuration));
               startPlaybackPolling();
             },
-            onStateChange: () => {
-              pollEmbeddedPlayback();
-            },
+            onStateChange: () => pollEmbeddedPlayback(),
           },
         });
       }
 
       if (videoProvider === 'vimeo') {
         await ensureVimeoApi();
-        if (isCancelled || !window.Vimeo?.Player || !playerContainerRef.current) return;
+        if (isCancelled || !window.Vimeo?.Player || !visibleIframeRef.current) return;
 
-        vimeoPlayerRef.current = new window.Vimeo.Player(playerContainerRef.current, {
-          url: currentRound.videoUrl,
-          // aspect-ratio handled by the padding-bottom container above
-        });
+        // Attach to the EXISTING iframe — no url option needed.
+        vimeoPlayerRef.current = new window.Vimeo.Player(visibleIframeRef.current);
         vimeoPlayerRef.current.on('loaded', async () => {
           try {
             const totalDuration = await vimeoPlayerRef.current.getDuration();
@@ -452,11 +462,16 @@ export default function ClientPortal() {
         <section className="overflow-hidden border border-black/10 bg-white shadow-[0_12px_36px_rgba(0,0,0,0.10)]">
           <div className="relative bg-black">
             {videoProvider === 'youtube' || videoProvider === 'vimeo' ? (
-              // padding-bottom technique gives a deterministic height before the
-              // SDK mounts its iframe, avoiding the zero-height race on first paint.
-              <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
-                <div ref={playerContainerRef} className="absolute inset-0" />
-              </div>
+              // Plain iframe always renders the video reliably.
+              // The SDK attaches to this same element for timestamp tracking.
+              <iframe
+                ref={visibleIframeRef}
+                src={playableEmbedUrl || undefined}
+                className="aspect-video w-full"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                title={currentRound?.title || 'Video preview'}
+              />
             ) : currentRound?.videoUrl ? (
               <video
                 ref={videoRef}
