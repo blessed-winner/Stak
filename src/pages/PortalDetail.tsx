@@ -115,7 +115,7 @@ export default function PortalDetail() {
       if (error) throw error;
       
       setNewNote('');
-      await refreshPortal();
+      await refreshPortal(true);
       addToast('Internal note added', 'success');
     } catch (error: any) {
       addToast(error.message || 'Failed to add note', 'error');
@@ -126,12 +126,20 @@ export default function PortalDetail() {
 
   const handleDeleteNote = async (noteId: string) => {
     try {
-      await deleteNote(noteId);
-      await refreshPortal();
+      // 1. Optimistically hide the note and close modal
       setHiddenNoteIds(prev => [...prev, noteId]);
-      addToast('Note deleted', 'success');
       setDeleteTarget(null);
+
+      // 2. Perform deletion
+      await deleteNote(noteId);
+      
+      // 3. Refresh data silently to sync state
+      await refreshPortal(true);
+      
+      addToast('Note deleted', 'success');
     } catch (error: any) {
+      // Revert if it fails
+      setHiddenNoteIds(prev => prev.filter(id => id !== noteId));
       addToast(error.message || 'Failed to delete note', 'error');
     }
   };
@@ -158,7 +166,7 @@ export default function PortalDetail() {
       setNewRoundTitle('');
       setNewRoundUrl('');
       setIsAddingRound(false);
-      await refreshPortal();
+      await refreshPortal(true);
       addToast('New round added', 'success');
     } catch (error: any) {
       addToast(error.message || 'Failed to add round', 'error');

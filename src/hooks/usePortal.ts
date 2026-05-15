@@ -10,12 +10,12 @@ export function usePortal(portalId: string) {
   const [activities, setActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchData = useCallback(async () => {
+  const fetchData = useCallback(async (silent = false) => {
     if (!portalId || !isUUID(portalId)) {
-      setLoading(false);
+      if (!silent) setLoading(false);
       return;
     }
-    setLoading(true);
+    if (!silent) setLoading(true);
 
     try {
       // 1. Fetch Portal
@@ -98,7 +98,7 @@ export function usePortal(portalId: string) {
     } catch (error) {
       console.error('Error fetching portal data:', error);
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   }, [portalId]);
 
@@ -114,7 +114,7 @@ export function usePortal(portalId: string) {
         table: 'revision_notes', 
         filter: `portal_id=eq.${portalId}`
       }, () => {
-        fetchData();
+        fetchData(true);
       })
       .subscribe();
 
@@ -126,7 +126,7 @@ export function usePortal(portalId: string) {
         table: 'activity', 
         filter: `portal_id=eq.${portalId}`
       }, () => {
-        fetchData();
+        fetchData(true);
       })
       .subscribe();
 
