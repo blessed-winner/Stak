@@ -10,12 +10,13 @@ Stak is a modern client review portal built with React, TypeScript, and Vite. It
 
 Stak provides a clean workspace for managing client projects and review cycles. The app includes:
 
-- a secure authenticated dashboard for editors
-- portal creation and portal detail views
-- client-facing review pages with video playback
-- timestamped feedback and revision notes
-- portal status tracking and recent activity views
-- settings and account-oriented navigation
+- **Secure Workspace:** Authenticated dashboard for editors with robust session persistence.
+- **Portal Management:** Creation, status tracking, and detail views for each client project.
+- **Client Review Interface:** Client-facing review pages with seamless video playback.
+- **Dual-Comment System:** Support for both precise, seekable timestamped notes and general overall feedback.
+- **Smart Playback:** Video automatically pauses and captures the timestamp when users begin typing feedback.
+- **Activity Tracking:** Recent activity views and comprehensive revision histories.
+- **Account Settings:** Preferences and account-oriented navigation.
 
 ## Tech Stack
 
@@ -111,8 +112,8 @@ npm run lint
 
 1. Open the private portal link shared by the editor.
 2. Watch the current video round inside the client portal.
-3. Add timestamped feedback directly on the frame you want to comment on.
-4. Submit revision notes and follow the latest project round.
+3. Choose between leaving timestamped feedback (which auto-pauses the video and captures the exact frame) or general overall feedback.
+4. Submit revision notes and collaborate smoothly on the latest project round.
 
 ## Notes
 

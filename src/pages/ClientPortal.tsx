@@ -76,12 +76,7 @@ function ensureVimeoApi() {
   return vimeoApiPromise;
 }
 
-function getVideoProvider(url?: string | null) {
-  if (!url) return null;
-  if (url.includes('youtube.com') || url.includes('youtu.be')) return 'youtube';
-  if (url.includes('vimeo.com')) return 'vimeo';
-  return 'direct';
-}
+
 
 function extractYouTubeVideoId(url?: string | null) {
   if (!url) return null;
@@ -107,12 +102,15 @@ export default function ClientPortal() {
   const playbackSecondsRef = useRef<number | null>(null);
   const playbackTimerRef = useRef<number | null>(null);
 
+  const [isGeneralNote, setIsGeneralNote] = useState(false);
+  const [frozenTimestamp, setFrozenTimestamp] = useState<number | null>(null);
+
   const { rounds, loading: loadingRounds } = useClientRounds(portal?.id || '');
   const { notes, refresh: refreshNotes } = useClientNotes(portal?.id || '');
   const currentRound = rounds.length > 0 ? rounds[rounds.length - 1] : null;
   const currentNotes = notes.filter((note) => note.roundId === currentRound?.id && note.authorRole === 'client');
   const visibleNotes = currentNotes.slice(0, 3);
-  const videoProvider = getVideoProvider(currentRound?.videoUrl);
+  const videoProvider = getProvider(currentRound?.videoUrl);
   const youtubeVideoId = extractYouTubeVideoId(currentRound?.videoUrl);
   // Build embed URLs with JS API flags so the SDK can attach to the iframe
   const embedUrl = currentRound?.videoUrl ? getEmbedUrl(currentRound.videoUrl) : null;
@@ -237,7 +235,7 @@ export default function ClientPortal() {
   }, [currentRound?.id]);
 
   useEffect(() => {
-    if (currentRound?.videoUrl && videoProvider === 'direct') {
+    if (currentRound?.videoUrl && videoProvider === 'external') {
       getVideoDuration(currentRound.videoUrl).then(setDuration);
     }
   }, [currentRound?.videoUrl, videoProvider]);
@@ -313,8 +311,8 @@ export default function ClientPortal() {
 
     setIsSubmitting(true);
     try {
-      const currentTime = await readCurrentTimestamp();
-      const submissionTimestamp = currentTime !== null ? formatPlaybackTime(currentTime) : undefined;
+      const currentTime = frozenTimestamp !== null ? frozenTimestamp : await readCurrentTimestamp();
+      const submissionTimestamp = isGeneralNote ? undefined : (currentTime !== null ? formatPlaybackTime(currentTime) : undefined);
 
       await submitRevision(
         portal.id,
@@ -322,10 +320,12 @@ export default function ClientPortal() {
         feedback,
         submissionTimestamp,
       );
-      if (currentTime !== null) {
+      if (currentTime !== null && !isGeneralNote) {
         updatePlaybackTimestamp(currentTime);
       }
       setFeedback('');
+      setFrozenTimestamp(null);
+      setIsGeneralNote(false);
       await refreshNotes();
     } catch (error) {
       console.error(error);
@@ -400,6 +400,44 @@ export default function ClientPortal() {
 
     return null;
   }
+
+  const handleInputFocus = async () => {
+    if (isGeneralNote) return;
+
+    if (videoRef.current) {
+      videoRef.current.pause();
+    } else if (youtubePlayerRef.current?.pauseVideo) {
+      youtubePlayerRef.current.pauseVideo();
+    } else if (vimeoPlayerRef.current?.pause) {
+      vimeoPlayerRef.current.pause();
+    }
+
+    if (frozenTimestamp === null) {
+      const t = await readCurrentTimestamp();
+      if (t !== null) setFrozenTimestamp(t);
+    }
+  };
+
+  const handleSeek = (timeStr: string | undefined | null) => {
+    if (!timeStr) return;
+    const parts = timeStr.split(':').map(Number);
+    let seconds = 0;
+    if (parts.length === 2) seconds = parts[0] * 60 + parts[1];
+    else if (parts.length === 3) seconds = parts[0] * 3600 + parts[1] * 60 + parts[2];
+    else return;
+
+    if (videoRef.current) {
+      videoRef.current.currentTime = seconds;
+      videoRef.current.play();
+    } else if (youtubePlayerRef.current?.seekTo) {
+      youtubePlayerRef.current.seekTo(seconds, true);
+      youtubePlayerRef.current.playVideo();
+    } else if (vimeoPlayerRef.current?.setCurrentTime) {
+      vimeoPlayerRef.current.setCurrentTime(seconds);
+      vimeoPlayerRef.current.play();
+    }
+  };
+
   return (
     <div className="min-h-screen bg-surface-base text-text-primary selection:bg-black selection:text-white">
       <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(0,0,0,0.08)_1px,transparent_0)] [background-size:16px_16px] opacity-40" />
@@ -496,7 +534,7 @@ export default function ClientPortal() {
               </div>
             )}
 
-            {currentRound?.videoUrl && videoProvider === 'direct' && (
+            {currentRound?.videoUrl && videoProvider === 'external' && (
               <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/10">
                 <div
                   className="h-full bg-white/70 transition-[width] duration-150"
