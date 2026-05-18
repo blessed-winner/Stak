@@ -8,6 +8,7 @@ import { useUIStore } from '../store/uiStore';
 import { useAuthStore } from '../store/authStore';
 import { createPortal } from '../hooks/usePortals';
 import { slugify, cn } from '../lib/utils';
+import { sendPortalEmail } from '../lib/email';
 import { motion, AnimatePresence } from 'motion/react';
 
 export default function PortalNew() {
@@ -40,6 +41,15 @@ export default function PortalNew() {
       });
 
       if (portalId) {
+        if (formData.clientEmail) {
+          const portalUrl = `${window.location.origin}/p/${profile?.slug || 'your-slug'}/${slug}`;
+          await sendPortalEmail({
+            to: formData.clientEmail,
+            clientName: formData.clientName,
+            projectName: formData.projectTitle,
+            portalUrl,
+          });
+        }
         addToast('Portal created Successfully', 'success');
         navigate(ROUTES.PORTAL_DETAIL(portalId));
       }
